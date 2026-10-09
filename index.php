@@ -15,166 +15,88 @@
             theme: {
                 extend: {
                     colors: {
-                        'paper-white': '#FFFFFF',
-                        'paper-light': '#F8FAF6',
-                        'paper-lines': '#E2E8F0',
-                        'ink-dark': '#0F172A',
-                        'vivid-green': '#00C853',
-                        'dark-green': '#054D20',
-                        'vivid-orange': '#FF6D00',
-                        'dark-orange': '#803700',
-                        'vivid-blue': '#00B0FF',
-                        'dark-blue': '#004B87',
-                        'vivid-yellow': '#FFD600',
-                        'dark-yellow': '#806B00',
-                        'vivid-pink': '#FF4081',
+                        'papel-branco': '#FFFFFF',
+                        'papel-claro': '#F8FAF6',
+                        'papel-linhas': '#E2E8F0',
+                        'papelao-fundo': '#c6a175',
+                        'tinta-escura': '#0F172A',
+                        'verde-vibrante': '#00C853',
+                        'verde-escuro': '#054D20',
+                        'laranja-vibrante': '#FF6D00',
+                        'laranja-escuro': '#803700',
+                        'azul-vibrante': '#00B0FF',
+                        'azul-escuro': '#004B87',
+                        'amarelo-vibrante': '#FFD600',
+                        'amarelo-escuro': '#806B00',
+                        'rosa-vibrante': '#FF4081',
                     },
                     fontFamily: {
+                        'gooddog': ['Gooddog', 'cursive', 'sans-serif'],
                         'fredoka': ['Fredoka', 'sans-serif'],
                         'nunito': ['Nunito', 'sans-serif'],
                     },
                     boxShadow: {
-                        'cartoon-green': '0px 6px 0px #054D20',
-                        'cartoon-orange': '0px 6px 0px #803700',
-                        'cartoon-blue': '0px 6px 0px #004B87',
-                        'cartoon-yellow': '0px 6px 0px #806B00',
-                        'cartoon-white': '0px 5px 0px #0F172A',
+                        'sombra-cartum-verde': '0px 6px 0px #054D20',
+                        'sombra-cartum-laranja': '0px 6px 0px #803700',
+                        'sombra-cartum-azul': '0px 6px 0px #004B87',
+                        'sombra-cartum-amarela': '0px 6px 0px #806B00',
+                        'sombra-cartum-branca': '0px 5px 0px #0F172A',
                     }
                 }
             }
         }
     </script>
-    <style>
-        /* Fundo externo com tom verde vivo vibrante */
-        body {
-            background-color: #054D20;
-            background-image: 
-                radial-gradient(#00C853 18%, transparent 19%),
-                radial-gradient(#00C853 18%, transparent 19%);
-            background-size: 50px 50px;
-            background-position: 0 0, 25px 25px;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* Página de livro limpa e esbranquiçada (White & Crisp) */
-        .full-notebook-white {
-            background-color: #FFFFFF;
-            background-image: linear-gradient(#E2E8F0 1.5px, transparent 1.5px);
-            background-size: 100% 34px;
-            border: 6px solid #0F172A;
-        }
-
-        /* Borda e cantos arredondados mais acentuados nos cards (24px - 28px) */
-        .card-rounded-more {
-            border-radius: 24px;
-        }
-
-        .card-border-green {
-            border: 4px solid #054D20;
-        }
-
-        .card-border-orange {
-            border: 4px solid #803700;
-        }
-
-        .card-border-blue {
-            border: 4px solid #004B87;
-        }
-
-        .card-border-yellow {
-            border: 4px solid #806B00;
-        }
-
-        .border-ink-dark {
-            border: 3px solid #0F172A;
-        }
-
-        /* Animação e inclinação dos cards */
-        .card-tilt-left {
-            transform: rotate(-1.5deg);
-        }
-
-        .card-tilt-right {
-            transform: rotate(1.5deg);
-        }
-
-        .card-tilt-small {
-            transform: rotate(-1deg);
-        }
-
-        .dynamic-card {
-            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .dynamic-card:hover {
-            transform: rotate(0deg) translateY(-8px) scale(1.03);
-            z-index: 10;
-        }
-
-        .dynamic-card:active {
-            transform: rotate(0deg) translateY(2px) scale(0.98);
-        }
-
-        /* Espiral do Caderno */
-        .ring-binder {
-            width: 18px;
-            height: 34px;
-            background: linear-gradient(180deg, #FFFFFF, #94A3B8);
-            border: 2px solid #0F172A;
-            border-radius: 6px;
-            box-shadow: 1px 2px 0px #0F172A;
-        }
-    </style>
+    <!-- Estilos customizados da página -->
+    <link rel="stylesheet" href="css/index-php.css">
 </head>
-<body class="font-nunito min-h-screen text-ink-dark flex flex-col justify-between p-2 sm:p-4 md:p-6">
+<body class="font-nunito min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
+
+    <!-- ELEMENTOS OSCILANTES DE FUNDO (CORREM DE UM LADO AO OUTRO) -->
+    <div id="elementos-fundo-oscilantes" aria-hidden="true">
+        <div class="elemento-fundo-oscilante elemento-fundo-1"></div>
+        <div class="elemento-fundo-oscilante elemento-fundo-2"></div>
+        <div class="elemento-fundo-oscilante elemento-fundo-3"></div>
+        <div class="elemento-fundo-oscilante elemento-fundo-4"></div>
+    </div>
 
     <!-- ESTRUTURA GLOBAL DO LIVRO (PÁGINA INTEIRA NA HORIZONTAL - BRANCO VIBRANTE) -->
-    <div class="w-full flex-1 flex flex-col justify-between full-notebook-white rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 relative">
+    <div id="livro-conteiner-principal" class="w-full flex-1 flex flex-col justify-between caderno-pagina-branca rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 relative">
 
         <!-- ESPIRAL DO CADERNO NO TOPO -->
-        <div class="w-full flex justify-between items-center -mt-8 sm:-mt-10 mb-4 z-20 px-2 sm:px-6">
-            <div class="ring-binder"></div>
-            <div class="ring-binder"></div>
-            <div class="ring-binder"></div>
-            <div class="ring-binder"></div>
-            <div class="ring-binder"></div>
-            <div class="ring-binder"></div>
-            <div class="ring-binder"></div>
-            <div class="ring-binder hidden sm:block"></div>
-            <div class="ring-binder hidden sm:block"></div>
-            <div class="ring-binder hidden md:block"></div>
-            <div class="ring-binder hidden md:block"></div>
-            <div class="ring-binder hidden md:block"></div>
+        <div id="espiral-topo-caderno" class="w-full flex justify-between items-center -mt-8 sm:-mt-10 mb-4 z-20 px-2 sm:px-6">
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno"></div>
+            <div class="espiral-caderno hidden sm:block"></div>
+            <div class="espiral-caderno hidden sm:block"></div>
+            <div class="espiral-caderno hidden md:block"></div>
+            <div class="espiral-caderno hidden md:block"></div>
+            <div class="espiral-caderno hidden md:block"></div>
         </div>
 
-        <!-- BARRA SUPERIOR DO LIVRO (LIMPA, BRANCA E VIBRANTE) -->
-        <header class="w-full flex flex-wrap items-center justify-between gap-4 pb-4 border-b-4 border-ink-dark mb-6">
+        <!-- BARRA SUPERIOR DO LIVRO -->
+        <header id="cabecalho-principal" class="w-full flex flex-wrap items-center justify-between gap-4 pb-4 mb-6">
             
             <!-- Perfil do Aluno com Selo Branco & Verde -->
-            <div class="flex items-center gap-3 bg-paper-light border-ink-dark rounded-2xl px-4 py-2 shadow-cartoon-white">
-                <div class="w-9 h-9 bg-vivid-yellow border-ink-dark rounded-xl flex items-center justify-center font-bold">
-                    <svg class="w-5 h-5 text-ink-dark" fill="currentColor" viewBox="0 0 24 24">
+            <div id="perfil-aluno" class="flex items-center gap-3 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
+                <div class="w-9 h-9 bg-amarelo-vibrante borda-tinta-escura rounded-xl flex items-center justify-center font-bold">
+                    <svg class="w-5 h-5 text-tinta-escura" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                 </div>
                 <div>
-                    <span class="block text-xs font-black text-vivid-green uppercase tracking-wider">NÍVEL 1</span>
-                    <span class="block font-fredoka text-base font-bold text-ink-dark leading-none">APRENDIZ SABIDO</span>
+                    <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider">NÍVEL 1</span>
+                    <span class="block font-fredoka text-base font-bold text-tinta-escura leading-none">APRENDIZ SABIDO</span>
                 </div>
             </div>
 
-            <!-- Título Principal do Livro -->
-            <div class="text-center">
-                <h1 class="font-fredoka text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wide uppercase text-vivid-green">
-                    LIVRO DE ATIVIDADES EDUCATIVAS
-                </h1>
-            </div>
-
             <!-- Controle de Áudio -->
-            <div class="flex items-center gap-2">
-                <button onclick="toggleAudio()" class="dynamic-card bg-vivid-blue text-white border-ink-dark rounded-2xl px-4 py-2 font-fredoka font-bold text-sm shadow-cartoon-white flex items-center gap-2">
+            <div id="controle-audio" class="flex items-center gap-2">
+                <button id="botao-ouvir-tela" onclick="toggleAudio()" class="cartao-dinamico bg-azul-vibrante text-white borda-tinta-escura rounded-2xl px-4 py-2 font-fredoka font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-2">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                     </svg>
@@ -183,32 +105,29 @@
             </div>
         </header>
 
-        <!-- SEÇÃO CENTRAL: CARDS MAIS ARREDONDADOS E COM BORDAS COLORIDAS VIBRANTES -->
-        <main class="w-full my-auto flex flex-col items-center">
+        <!-- SEÇÃO CENTRAL -->
+        <main id="conteudo-principal" class="w-full my-auto flex flex-col items-center">
             
             <!-- TÍTULO DA ATIVIDADE -->
-            <div class="text-center max-w-2xl mb-8 space-y-2">
-                <span class="inline-block bg-vivid-yellow border-ink-dark rounded-xl px-4 py-1.5 font-fredoka text-xs font-extrabold text-ink-dark uppercase tracking-wider shadow-sm">
-                    ENSINO FUNDAMENTAL 1 (6 A 9 ANOS)
-                </span>
-                <h2 class="font-fredoka text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink-dark leading-tight">
+            <div id="secao-titulo-atividade" class="text-center max-w-4xl mb-8 space-y-2">
+                <h2 class="font-gooddog text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-tinta-escura leading-tight tracking-wider">
                     O QUE VAMOS APRENDER HOJE?
                 </h2>
-                <p class="font-nunito text-lg font-extrabold text-gray-700">
+                <p class="font-nunito text-lg sm:text-xl md:text-2xl font-extrabold text-gray-700 tracking-wide">
                     Escolha um dos cards coloridos abaixo para começar!
                 </p>
             </div>
 
-            <!-- GRADE DE CARDS (ARREDONDADOS + BORDAS COLORIDAS + VIBRANTES) -->
-            <div class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2">
+            <!-- GRADE DE CARDS (TÍTULOS DOS CARDS COM FONTE GOODDOG) -->
+            <div id="grade-atividades" class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2 py-4">
                 
-                <!-- CARD 1: MATEMÁTICA (VERDE VIBRANTE COM BORDA VERDE ESCURA) -->
-                <div onclick="abrirModulo('Matemática Divertida')" class="dynamic-card card-tilt-left bg-vivid-green text-white card-border-green card-rounded-more p-6 shadow-cartoon-green flex flex-col justify-between min-h-[240px] cursor-pointer group">
+                <!-- CARD 1: MATEMÁTICA -->
+                <div id="card-matematica" onclick="abrirModulo('Matemática Divertida')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-paper-white text-dark-green font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-dark-green rounded-xl">
+                        <span class="bg-papel-branco text-verde-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
                             JOGO 01
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-dark-green rounded-2xl flex items-center justify-center text-white">
+                        <div class="w-11 h-11 bg-white/25 border-2 border-verde-escuro rounded-2xl flex items-center justify-center text-white">
                             <svg class="w-7 h-7 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                             </svg>
@@ -216,15 +135,15 @@
                     </div>
                     
                     <div class="my-4">
-                        <h3 class="font-fredoka text-2xl font-extrabold leading-tight uppercase text-white">
+                        <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
                             DESAFIOS DE NÚMEROS
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-green-100 mt-1">
+                        <p class="font-nunito text-sm font-extrabold text-green-100 mt-1 tracking-wide">
                             Contas e somas divertidas
                         </p>
                     </div>
 
-                    <div class="w-full bg-paper-white text-dark-green font-fredoka font-extrabold text-base py-3 px-4 border-2 border-dark-green rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-vivid-yellow group-hover:text-ink-dark transition-colors">
+                    <div class="w-full bg-papel-branco text-verde-escuro font-fredoka font-extrabold text-base py-3 px-4 border-2 border-verde-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
                         <span>JOGAR AGORA</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -232,13 +151,13 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: PORTUGUÊS / LEITURA (LARANJA VIBRANTE COM BORDA LARANJA ESCURA) -->
-                <div onclick="abrirModulo('Leitura e Palavras')" class="dynamic-card card-tilt-right bg-vivid-orange text-white card-border-orange card-rounded-more p-6 shadow-cartoon-orange flex flex-col justify-between min-h-[240px] cursor-pointer group">
+                <!-- CARD 2: PORTUGUÊS / LEITURA -->
+                <div id="card-portugues" onclick="abrirModulo('Leitura e Palavras')" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-paper-white text-dark-orange font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-dark-orange rounded-xl">
+                        <span class="bg-papel-branco text-laranja-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
                             JOGO 02
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-dark-orange rounded-2xl flex items-center justify-center text-white">
+                        <div class="w-11 h-11 bg-white/25 border-2 border-laranja-escuro rounded-2xl flex items-center justify-center text-white">
                             <svg class="w-7 h-7 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                             </svg>
@@ -246,15 +165,15 @@
                     </div>
                     
                     <div class="my-4">
-                        <h3 class="font-fredoka text-2xl font-extrabold leading-tight uppercase text-white">
+                        <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
                             LEITURA E PALAVRAS
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-orange-100 mt-1">
+                        <p class="font-nunito text-sm font-extrabold text-orange-100 mt-1 tracking-wide">
                             Forme palavras e frases
                         </p>
                     </div>
 
-                    <div class="w-full bg-paper-white text-dark-orange font-fredoka font-extrabold text-base py-3 px-4 border-2 border-dark-orange rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-vivid-yellow group-hover:text-ink-dark transition-colors">
+                    <div class="w-full bg-papel-branco text-laranja-escuro font-fredoka font-extrabold text-base py-3 px-4 border-2 border-laranja-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
                         <span>JOGAR AGORA</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -262,13 +181,13 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: ARTE / QUADRO (AZUL ELÉTRICO COM BORDA AZUL ESCURA) -->
-                <div onclick="abrirModulo('Desenho e Arte')" class="dynamic-card card-tilt-small bg-vivid-blue text-white card-border-blue card-rounded-more p-6 shadow-cartoon-blue flex flex-col justify-between min-h-[240px] cursor-pointer group">
+                <!-- CARD 3: ARTE / QUADRO -->
+                <div id="card-desenho" onclick="abrirModulo('Desenho e Arte')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-6 shadow-sombra-cartum-azul flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-paper-white text-dark-blue font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-dark-blue rounded-xl">
+                        <span class="bg-papel-branco text-azul-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-azul-escuro rounded-xl">
                             CRIATIVIDADE
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-dark-blue rounded-2xl flex items-center justify-center text-white">
+                        <div class="w-11 h-11 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white">
                             <svg class="w-7 h-7 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4c0-2.21 3.58-9 7-13 3.42 4 7 10.79 7 13a4 4 0 01-4 4M7 21h10"/>
                             </svg>
@@ -276,15 +195,15 @@
                     </div>
                     
                     <div class="my-4">
-                        <h3 class="font-fredoka text-2xl font-extrabold leading-tight uppercase text-white">
+                        <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
                             QUADRO DE DESENHO
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-blue-100 mt-1">
+                        <p class="font-nunito text-sm font-extrabold text-blue-100 mt-1 tracking-wide">
                             Pinte e crie suas formas
                         </p>
                     </div>
 
-                    <div class="w-full bg-paper-white text-dark-blue font-fredoka font-extrabold text-base py-3 px-4 border-2 border-dark-blue rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-vivid-yellow group-hover:text-ink-dark transition-colors">
+                    <div class="w-full bg-papel-branco text-azul-escuro font-fredoka font-extrabold text-base py-3 px-4 border-2 border-azul-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
                         <span>ABRIR QUADRO</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -292,13 +211,13 @@
                     </div>
                 </div>
 
-                <!-- CARD 4: MINHAS MEDALHAS (AMARELO SOLAR COM BORDA DOURADA ESCURA) -->
-                <div onclick="abrirModulo('Minhas Medalhas')" class="dynamic-card card-tilt-right bg-vivid-yellow text-ink-dark card-border-yellow card-rounded-more p-6 shadow-cartoon-yellow flex flex-col justify-between min-h-[240px] cursor-pointer group">
+                <!-- CARD 4: MINHAS MEDALHAS -->
+                <div id="card-medalhas" onclick="abrirModulo('Minhas Medalhas')" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-leve-direita bg-amarelo-vibrante text-tinta-escura cartao-borda-amarela cartao-arredondado p-6 shadow-sombra-cartum-amarela flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-paper-white text-dark-yellow font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-dark-yellow rounded-xl">
+                        <span class="bg-papel-branco text-amarelo-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-amarelo-escuro rounded-xl">
                             PRÊMIOS
                         </span>
-                        <div class="w-11 h-11 bg-black/10 border-2 border-dark-yellow rounded-2xl flex items-center justify-center text-ink-dark">
+                        <div class="w-11 h-11 bg-black/10 border-2 border-amarelo-escuro rounded-2xl flex items-center justify-center text-tinta-escura">
                             <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
                                 <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 003.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
                             </svg>
@@ -306,15 +225,15 @@
                     </div>
                     
                     <div class="my-4">
-                        <h3 class="font-fredoka text-2xl font-extrabold leading-tight uppercase text-ink-dark">
+                        <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-tinta-escura tracking-wider">
                             MINHAS MEDALHAS
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-yellow-900 mt-1">
+                        <p class="font-nunito text-sm font-extrabold text-yellow-900 mt-1 tracking-wide">
                             Veja suas conquistas
                         </p>
                     </div>
 
-                    <div class="w-full bg-dark-yellow text-white font-fredoka font-extrabold text-base py-3 px-4 rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-vivid-green transition-colors">
+                    <div class="w-full bg-amarelo-escuro text-white font-fredoka font-extrabold text-base py-3 px-4 rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-verde-vibrante transition-colors">
                         <span>VER MEDALHAS</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -327,12 +246,12 @@
         </main>
 
         <!-- RODAPÉ INTERNO -->
-        <footer class="w-full pt-4 border-t-4 border-ink-dark mt-6 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm font-fredoka font-bold text-gray-700">
+        <footer id="rodape-principal" class="w-full pt-4 mt-6 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm font-fredoka font-bold text-gray-700">
             <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 bg-vivid-green border border-ink-dark rounded-full inline-block"></span>
+                <span class="w-3.5 h-3.5 bg-verde-vibrante border border-tinta-escura rounded-full inline-block"></span>
                 <span>PÁGINA 01 DE ATIVIDADES</span>
             </div>
-            <div class="bg-paper-light border-ink-dark px-3 py-1.5 rounded-xl text-ink-dark uppercase font-extrabold shadow-sm">
+            <div class="bg-papel-claro borda-tinta-escura px-3 py-1.5 rounded-xl text-tinta-escura uppercase font-extrabold shadow-sm">
                 PROTÓTIPO V3 - CARDS VIBRANTES & BRANCO VIVO
             </div>
         </footer>
