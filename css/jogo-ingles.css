@@ -1,0 +1,382 @@
+/* ============================================================
+   CSS: Jogo de Inglês - Gap Fill Quiz
+   Estilo sketchbook, papelão, fonte Gooddog
+   ============================================================ */
+
+/* Fonte Personalizada Gooddog */
+@font-face {
+    font-family: 'Gooddog';
+    src: url('../fonts/good_dog/gooddog.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.fonte-gooddog {
+    font-family: 'Gooddog', cursive, sans-serif;
+    letter-spacing: 0.06em;
+}
+
+/* Fonte Personalizada Bingo (Textos Secundários) */
+@font-face {
+    font-family: 'Bingo';
+    src: url('../fonts/bingo/BINGO.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.fonte-bingo {
+    font-family: 'Bingo', cursive, sans-serif;
+    letter-spacing: 0.04em;
+}
+
+/* Fundo papelão (#c6a175) */
+body {
+    background-color: #c6a175;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Animações dos elementos oscilantes (idêntico ao index) */
+@keyframes flutuar-horizontal-direita {
+    0%   { transform: translate(-15vw, 0px) rotate(0deg); }
+    50%  { transform: translate(50vw, -30px) rotate(180deg); }
+    100% { transform: translate(115vw, 0px) rotate(360deg); }
+}
+
+@keyframes flutuar-horizontal-esquerda {
+    0%   { transform: translate(115vw, 0px) rotate(0deg); }
+    50%  { transform: translate(45vw, 35px) rotate(-180deg); }
+    100% { transform: translate(-15vw, 0px) rotate(-360deg); }
+}
+
+.elemento-fundo-oscilante {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+    border-radius: 9999px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.elemento-fundo-1 {
+    top: 8%;  left: 0;
+    width: 90px;  height: 90px;
+    background-color: #FFD600;
+    animation: flutuar-horizontal-direita 22s ease-in-out infinite alternate;
+}
+.elemento-fundo-2 {
+    top: 55%; right: 0;
+    width: 120px; height: 120px;
+    background-color: #00B0FF;
+    animation: flutuar-horizontal-esquerda 28s ease-in-out infinite alternate;
+}
+.elemento-fundo-3 {
+    top: 78%; left: 0;
+    width: 75px;  height: 75px;
+    background-color: #FF6D00;
+    animation: flutuar-horizontal-direita 18s ease-in-out infinite alternate;
+}
+.elemento-fundo-4 {
+    top: 32%; right: 0;
+    width: 105px; height: 105px;
+    background-color: #FF4081;
+    animation: flutuar-horizontal-esquerda 25s ease-in-out 3s infinite alternate;
+}
+
+/* Página interna (livro branco c/ linhas) */
+.caderno-pagina-branca {
+    background-color: #FFFFFF;
+    background-image: linear-gradient(#E2E8F0 1.5px, transparent 1.5px);
+    background-size: 100% 34px;
+    border: 6px solid #0F172A;
+    position: relative;
+    z-index: 10;
+}
+
+/* Espiral do caderno */
+.espiral-caderno {
+    width: 18px;
+    height: 34px;
+    background: linear-gradient(180deg, #FFFFFF, #94A3B8);
+    border: 2px solid #0F172A;
+    border-radius: 6px;
+    box-shadow: 1px 2px 0px #0F172A;
+}
+
+/* Borda escura padrão */
+.borda-tinta-escura {
+    border: 3px solid #0F172A;
+}
+
+/* ============================================================
+   ÁREA DA PERGUNTA (gap fill)
+   ============================================================ */
+
+/* Caixa da pergunta principal */
+#caixa-pergunta {
+    background: #fff;
+    border: 4px solid #0F172A;
+    border-radius: 24px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0px 6px 0px #0F172A;
+    transition: background 0.3s;
+}
+
+/* Texto da pergunta (primeira + segunda parte) */
+.texto-pergunta {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0F172A;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    text-align: center;
+    line-height: 1.8;
+}
+
+/* A lacuna / gap (underscore estilizado) */
+.lacuna {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 48px;
+    background: #fff8dc;
+    border-bottom: 5px solid #0F172A;
+    border-radius: 6px;
+    padding: 0 1rem;
+    font-family: 'Gooddog', cursive, sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+    color: #0F172A;
+    transition: all 0.3s ease;
+    vertical-align: middle;
+    position: relative;
+}
+
+/* Estado: resposta inserida na lacuna */
+.lacuna.lacuna-preenchida {
+    background: #d1fae5;
+    border-color: #054D20;
+    color: #054D20;
+    font-weight: bold;
+}
+
+/* Estado: resposta errada piscando */
+.lacuna.lacuna-errada {
+    background: #fee2e2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+    animation: piscar-erro 0.5s ease;
+}
+
+/* Estado: resposta correta confirmada */
+.lacuna.lacuna-correta {
+    background: #d1fae5;
+    border-color: #054D20;
+    color: #054D20;
+    box-shadow: 0 4px 0 #054D20;
+}
+
+@keyframes piscar-erro {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+}
+
+/* ============================================================
+   GRADE DE CARDS DE RESPOSTA
+   ============================================================ */
+
+#grade-opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+/* Card de opção de resposta */
+.cartao-opcao {
+    font-family: 'Bingo', cursive, sans-serif;
+    letter-spacing: 0.05em;
+    font-size: 1.4rem;
+    padding: 0.7rem 1.6rem;
+    border-radius: 18px;
+    border: 4px solid #0F172A;
+    box-shadow: 0px 5px 0px #0F172A;
+    cursor: pointer;
+    background: #fff;
+    color: #0F172A;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+    user-select: none;
+    position: relative;
+}
+
+.cartao-opcao:hover {
+    transform: translateY(-6px) scale(1.06);
+    box-shadow: 0px 10px 0px #0F172A;
+}
+
+.cartao-opcao:active {
+    transform: translateY(2px) scale(0.97);
+    box-shadow: 0px 2px 0px #0F172A;
+}
+
+/* Estado: opção errada — vermelho + tremer */
+.cartao-opcao.opcao-errada {
+    background: #fee2e2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+    box-shadow: 0px 5px 0px #b91c1c;
+    animation: piscar-erro 0.4s ease;
+    pointer-events: none;
+}
+
+/* Estado: opção correta (antes de avançar) */
+.cartao-opcao.opcao-correta {
+    background: #d1fae5;
+    border-color: #054D20;
+    color: #054D20;
+    box-shadow: 0px 5px 0px #054D20;
+    pointer-events: none;
+}
+
+/* Estado: opções desabilitadas após acerto */
+.cartao-opcao.opcao-desabilitada {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   BARRA DE PROGRESSO
+   ============================================================ */
+
+#barra-progresso-externa {
+    background: #E2E8F0;
+    border: 3px solid #0F172A;
+    border-radius: 999px;
+    height: 18px;
+    overflow: hidden;
+}
+
+#barra-progresso-interna {
+    height: 100%;
+    background: linear-gradient(90deg, #00C853, #00B0FF);
+    border-radius: 999px;
+    transition: width 0.5s ease;
+}
+
+/* ============================================================
+   FEEDBACK / OVERLAY DE RESULTADO
+   ============================================================ */
+
+#overlay-resultado {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+#overlay-resultado.ativo {
+    display: flex;
+}
+
+#caixa-resultado {
+    background: #fff;
+    border: 6px solid #0F172A;
+    border-radius: 32px;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    box-shadow: 0 12px 0 #0F172A;
+    max-width: 420px;
+    width: 90%;
+}
+
+/* Emoji grande de resultado */
+.emoji-resultado {
+    font-size: 5rem;
+    line-height: 1;
+}
+
+/* ============================================================
+   BARRA DE AÇÃO (DINÂMICA) - Animação nos cards de ação
+   ============================================================ */
+
+.cartao-dinamico {
+    transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease;
+    will-change: transform;
+}
+
+.cartao-dinamico:hover {
+    transform: rotate(0deg) translateY(-10px) scale(1.04) !important;
+    z-index: 30;
+}
+
+/* Botão de ação (jogar de novo, voltar etc.) */
+.botao-acao {
+    font-family: 'Bingo', cursive, sans-serif;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding: 0.75rem 1.8rem;
+    border-radius: 16px;
+    border: 4px solid #0F172A;
+    box-shadow: 0px 5px 0px #0F172A;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.botao-acao:hover {
+    transform: translateY(-4px);
+    box-shadow: 0px 9px 0px #0F172A;
+}
+
+.botao-acao:active {
+    transform: translateY(2px);
+    box-shadow: 0px 2px 0px #0F172A;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 640px) {
+    .texto-pergunta {
+        font-size: 1.25rem;
+    }
+
+    .lacuna {
+        min-width: 90px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .cartao-opcao {
+        font-size: 1.1rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+    #caixa-resultado {
+        padding: 1.5rem;
+    }
+}

@@ -12,6 +12,20 @@
     letter-spacing: 0.06em;
 }
 
+/* Fonte Personalizada Bingo (Textos Secundários) */
+@font-face {
+    font-family: 'Bingo';
+    src: url('../fonts/bingo/BINGO.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.fonte-bingo {
+    font-family: 'Bingo', cursive, sans-serif;
+    letter-spacing: 0.04em;
+}
+
 /* Fundo externo tom papelão (#c6a175) com elementos oscilantes flutuantes */
 body {
     background-color: #c6a175;

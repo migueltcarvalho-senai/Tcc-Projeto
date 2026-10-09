@@ -1,0 +1,172 @@
+================================================================================
+          HISTÓRICO E RESUMO DE DESENVOLVIMENTO - PROJETO TCC
+         SKETCHBOOK EDUCACIONAL INTERATIVO (ENSINO FUNDAMENTAL 1)
+================================================================================
+Data de Atualização: 09/10/2026
+Ambiente de Execução: Laragon (Apache, PHP 8.x, MySQL 8.x / porta 3308)
+Público-Alvo: Crianças de 6 a 9 anos (Ensino Fundamental 1)
+Foco Pedagógico Atual: Língua Inglesa (English for Kids)
+================================================================================
+
+1. IDENTIDADE VISUAL E DESIGN SYSTEM
+--------------------------------------------------------------------------------
+- Conceito Visual: Estilo "Caderno Escolar / Sketchbook" lúdico e vibrante.
+- Folha Central: Representação de página branca de caderno pautado (linhas
+  sutis horizontais), contorno espesso tipo cartum (borda escura) e detalhe de
+  espiral no topo.
+- Fundo da Aplicação:
+  * Cor de fundo ajustada para o tom papelão/kraft: #c6a175.
+  * Elementos oscilantes de fundo animados via CSS (@keyframes), flutuando
+    continuamente de um lado para o outro da tela para dar dinamismo sem
+    poluição visual.
+- Cores de Destaque:
+  * Verde vibrante (#00C853) / Verde escuro (#054D20)
+  * Laranja vibrante (#FF6D00) / Laranja escuro (#803700)
+  * Azul vibrante (#00B0FF) / Azul escuro (#004B87)
+  * Amarelo vibrante (#FFD600) / Amarelo escuro (#806B00)
+  * Papelão fundo (#c6a175) / Tinta escura (#0F172A)
+  * Sombras no estilo cartum rígido (drop shadows sem desfoque).
+
+--------------------------------------------------------------------------------
+2. TIPOGRAFIA PERSONALIZADA
+--------------------------------------------------------------------------------
+- Títulos Principais e Títulos de Destaque:
+  * Fonte: "Gooddog" (arquivo: fonts/good_dog/gooddog.TTF).
+  * Aplicada no título principal ("O QUE VAMOS APRENDER HOJE?"), títulos dos
+    cards de atividades e título principal do jogo ("COMPLETE THE SENTENCE!").
+  * Espaçamento ajustado (letter-spacing: 0.06em) para leitura agradável.
+- Textos Secundários, Badges, Botões e Interfaces Auxiliares:
+  * Fonte: "Bingo" (arquivo: fonts/bingo/BINGO.ttf).
+  * Incorporada via @font-face nos arquivos CSS e mapeada no Tailwind CSS.
+  * Aplicada em:
+    - Subtítulos explicativos;
+    - Perfil do aluno (Nível, Nome do Aprendiz);
+    - Botão de acessibilidade / ouvir tela;
+    - Badges dos cards (JOGO 01, JOGO 02, CRIATIVIDADE, PRÊMIOS);
+    - Textos informativos de cada card;
+    - Botões de ação ("JOGAR AGORA", "ABRIR QUADRO", "VER MEDALHAS", etc.);
+    - Placar de pontuação ("SCORE"), barra de progresso e feedbacks do jogo;
+    - Cards de opções de escolha do quiz;
+    - Rodapé informativo das páginas.
+
+--------------------------------------------------------------------------------
+3. ANIMAÇÕES E COMPORTAMENTO DOS CARDS (PÁGINA PRINCIPAL)
+--------------------------------------------------------------------------------
+- Disposição em Zig-Zag:
+  * Cards organizados em eixo horizontal alternando posições (2 ligeiramente
+    elevados e 2 ligeiramente rebaixados).
+- Inclinação Lúdica:
+  * Cada card possui uma rotação inicial sutil (tortos/inclinados alternados
+    entre esquerda e direita: -3.5deg, +3.5deg, -2.5deg, +2.8deg).
+- Efeito Hover (Desentortar):
+  * Ao passar o cursor do mouse (hover), o card se desentorta suavemente para
+    rotação 0deg, elevando-se ligeiramente com física elástica (cubic-bezier) e
+    aumentando de escala (scale 1.04).
+
+--------------------------------------------------------------------------------
+4. PADRONIZAÇÃO DE NOMENCLATURAS E ESTRUTURAÇÃO DE CÓDIGO
+--------------------------------------------------------------------------------
+- Classes e Identificadores (IDs):
+  * Todos os IDs e classes CSS foram traduzidos e padronizados semanticamente
+    para o português (ex.: #livro-conteiner-principal, #cabecalho-principal,
+    .cartao-dinamico, .cartao-zigzag-cima, .cartao-arredondado, etc.).
+- Modularização do CSS:
+  * Todo o CSS antes embutido inline foi extraído para folhas de estilo
+    externas na pasta /css:
+    - css/index.css (para index.html)
+    - css/index-php.css (para index.php)
+    - css/jogo-ingles.css (para jogo-ingles.php)
+
+--------------------------------------------------------------------------------
+5. DESENVOLVIMENTO DO PRIMEIRO JOGO: QUIZ DE INGLÊS (GAP FILL)
+--------------------------------------------------------------------------------
+- Arquivo Principal: jogo-ingles.php
+- Estilo: css/jogo-ingles.css
+- Mecânica do Jogo:
+  * Formato "Complete the Sentence" (preencher lacuna).
+  * A frase é dividida em 3 partes:
+    1. Primeira parte da frase;
+    2. Lacuna central ("gap" sublinhado e destacado);
+    3. Segunda parte da frase.
+  * Abaixo da pergunta, são exibidos cards interativos com opções de palavras,
+    misturando a resposta correta com opções erradas (distratores).
+  * Verificação Interativa:
+    - Ao clicar em uma opção incorreta: a lacuna e o card ficam vermelhos,
+      tremem com animação de erro e emitem aviso ("Try again!"), permitindo
+      nova tentativa.
+    - Ao clicar na opção correta: o card fica verde, a lacuna é preenchida
+      com a resposta em verde, feedback positivo é exibido ("Correct! Well
+      done!"), a pontuação sobe e o jogo avança automaticamente após 1.4s.
+  * Barra de Progresso dinâmica exibindo porcentagem e número da questão.
+  * Tela de Conclusão / Overlay Final:
+    - Exibe mensagem com base no aproveitamento (troféu/emoji, parabéns);
+    - Placar final com total de acertos;
+    - Botões para reiniciar o jogo ("Play Again") ou voltar à página inicial.
+- Randomização Dupla:
+  * Ordem das perguntas: embaralhada no servidor via shuffle() em PHP a cada
+    vez que a página é carregada ou reiniciada.
+  * Ordem dos cards de resposta: embaralhada no cliente via algoritmo
+    Fisher-Yates no JavaScript a cada pergunta.
+
+--------------------------------------------------------------------------------
+6. BANCO DE DADOS E ARQUITETURA DE DADOS (MYSQL)
+--------------------------------------------------------------------------------
+- Banco de Dados: `tccdb`
+- Conexão: config/config.php (host localhost:3308, usuário root)
+- Script de Migração: banco/jogo_ingles_migration.sql
+- Estrutura Relacional Criada:
+  1. Tabela `Jogo`:
+     - id (INT, PK, AUTO_INCREMENT)
+     - nome (INT)
+     - descricao (VARCHAR)
+
+  2. Tabela `Pergunta`:
+     - id (INT, PK, AUTO_INCREMENT)
+     - primeira parte (VARCHAR)
+     - resposta (VARCHAR)
+     - segunda parte (VARCHAR)
+     - Jogo_id (INT, FK referenciando Jogo.id)
+
+  3. Tabela `Conjunto de respostas erradas`:
+     - id (INT, PK, AUTO_INCREMENT)
+     - nome do conjunto (VARCHAR)
+     - conjunto (JSON contendo o array de respostas erradas)
+     - Pergunta_id (INT, FK referenciando Pergunta.id)
+
+- Integração PHP/MySQL:
+  * Query com INNER/LEFT JOIN e Prepared Statement (segurança contra
+    SQL Injection).
+  * Decodificação nativa do campo JSON (`conjunto`) via json_decode() para
+    misturar com a resposta correta.
+
+--------------------------------------------------------------------------------
+7. MAPA ATUAL DE ARQUIVOS DO PROJETO
+--------------------------------------------------------------------------------
+c:\Users\sesi2b\laragon\www\Tcc-Projeto\
+│
+├── index.html                   # Página inicial estática (HTML/Tailwind)
+├── index.php                    # Página inicial dinâmica (PHP)
+├── jogo-ingles.php              # Página do 1º Jogo de Inglês (Gap Fill Quiz)
+├── RESUMO_PROJETO.txt           # Este documento de histórico e status
+│
+├── css/
+│   ├── index.css                # Estilos da página index.html
+│   ├── index-php.css            # Estilos da página index.php
+│   └── jogo-ingles.css          # Estilos do jogo de inglês
+│
+├── fonts/
+│   ├── good_dog/gooddog.TTF     # Fonte para títulos principais
+│   ├── bingo/BINGO.ttf          # Fonte para textos secundários
+│   ├── child_dream_2/dream.ttf  # Fonte alternativa Dream
+│   └── cute_dolphin/            # Fonte Cute Dolphin
+│
+├── banco/
+│   ├── TCCdb_Prototipo.sql      # Dump/esquema original prévio
+│   └── jogo_ingles_migration.sql # Script SQL oficial do jogo de inglês
+│
+└── config/
+    ├── config.php               # Conexão centralizada com o banco tccdb
+    └── proteger.php             # Script auxiliar de proteção/sessão
+================================================================================
+FIM DO RELATÓRIO
+================================================================================

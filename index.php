@@ -32,6 +32,7 @@
                     },
                     fontFamily: {
                         'gooddog': ['Gooddog', 'cursive', 'sans-serif'],
+                        'bingo': ['Bingo', 'cursive', 'sans-serif'],
                         'fredoka': ['Fredoka', 'sans-serif'],
                         'nunito': ['Nunito', 'sans-serif'],
                     },
@@ -49,7 +50,7 @@
     <!-- Estilos customizados da página -->
     <link rel="stylesheet" href="css/index-php.css">
 </head>
-<body class="font-nunito min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
+<body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
 
     <!-- ELEMENTOS OSCILANTES DE FUNDO (CORREM DE UM LADO AO OUTRO) -->
     <div id="elementos-fundo-oscilantes" aria-hidden="true">
@@ -89,14 +90,14 @@
                     </svg>
                 </div>
                 <div>
-                    <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider">NÍVEL 1</span>
-                    <span class="block font-fredoka text-base font-bold text-tinta-escura leading-none">APRENDIZ SABIDO</span>
+                    <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider font-bingo">NÍVEL 1</span>
+                    <span class="block font-bingo text-base font-bold text-tinta-escura leading-none">APRENDIZ SABIDO</span>
                 </div>
             </div>
 
             <!-- Controle de Áudio -->
             <div id="controle-audio" class="flex items-center gap-2">
-                <button id="botao-ouvir-tela" onclick="toggleAudio()" class="cartao-dinamico bg-azul-vibrante text-white borda-tinta-escura rounded-2xl px-4 py-2 font-fredoka font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-2">
+                <button id="botao-ouvir-tela" onclick="toggleAudio()" class="cartao-dinamico bg-azul-vibrante text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-2">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                     </svg>
@@ -113,7 +114,7 @@
                 <h2 class="font-gooddog text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-tinta-escura leading-tight tracking-wider">
                     O QUE VAMOS APRENDER HOJE?
                 </h2>
-                <p class="font-nunito text-lg sm:text-xl md:text-2xl font-extrabold text-gray-700 tracking-wide">
+                <p class="font-bingo text-lg sm:text-xl md:text-2xl font-extrabold text-gray-700 tracking-wide">
                     Escolha um dos cards coloridos abaixo para começar!
                 </p>
             </div>
@@ -121,40 +122,38 @@
             <!-- GRADE DE CARDS (TÍTULOS DOS CARDS COM FONTE GOODDOG) -->
             <div id="grade-atividades" class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2 py-4">
                 
-                <!-- CARD 1: MATEMÁTICA -->
-                <div id="card-matematica" onclick="abrirModulo('Matemática Divertida')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group">
+                <!-- CARD 1: JOGO DE INGLÊS -->
+                <a id="card-ingles" href="jogo-ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
-                        <span class="bg-papel-branco text-verde-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
+                        <span class="bg-papel-branco text-verde-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
                             JOGO 01
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-verde-escuro rounded-2xl flex items-center justify-center text-white">
-                            <svg class="w-7 h-7 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                            </svg>
+                        <div class="w-11 h-11 bg-white/25 border-2 border-verde-escuro rounded-2xl flex items-center justify-center text-white text-2xl">
+                            🇬🇧
                         </div>
                     </div>
                     
                     <div class="my-4">
                         <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
-                            DESAFIOS DE NÚMEROS
+                            COMPLETE THE SENTENCE
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-green-100 mt-1 tracking-wide">
-                            Contas e somas divertidas
+                        <p class="font-bingo text-sm font-extrabold text-green-100 mt-1 tracking-wide">
+                            Fill in the gap in English!
                         </p>
                     </div>
 
-                    <div class="w-full bg-papel-branco text-verde-escuro font-fredoka font-extrabold text-base py-3 px-4 border-2 border-verde-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
+                    <div class="w-full bg-papel-branco text-verde-escuro font-bingo font-extrabold text-base py-3 px-4 border-2 border-verde-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
                         <span>JOGAR AGORA</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
                     </div>
-                </div>
+                </a>
 
                 <!-- CARD 2: PORTUGUÊS / LEITURA -->
                 <div id="card-portugues" onclick="abrirModulo('Leitura e Palavras')" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-papel-branco text-laranja-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
+                        <span class="bg-papel-branco text-laranja-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
                             JOGO 02
                         </span>
                         <div class="w-11 h-11 bg-white/25 border-2 border-laranja-escuro rounded-2xl flex items-center justify-center text-white">
@@ -168,12 +167,12 @@
                         <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
                             LEITURA E PALAVRAS
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-orange-100 mt-1 tracking-wide">
+                        <p class="font-bingo text-sm font-extrabold text-orange-100 mt-1 tracking-wide">
                             Forme palavras e frases
                         </p>
                     </div>
 
-                    <div class="w-full bg-papel-branco text-laranja-escuro font-fredoka font-extrabold text-base py-3 px-4 border-2 border-laranja-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
+                    <div class="w-full bg-papel-branco text-laranja-escuro font-bingo font-extrabold text-base py-3 px-4 border-2 border-laranja-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
                         <span>JOGAR AGORA</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -184,7 +183,7 @@
                 <!-- CARD 3: ARTE / QUADRO -->
                 <div id="card-desenho" onclick="abrirModulo('Desenho e Arte')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-6 shadow-sombra-cartum-azul flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-papel-branco text-azul-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-azul-escuro rounded-xl">
+                        <span class="bg-papel-branco text-azul-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-azul-escuro rounded-xl">
                             CRIATIVIDADE
                         </span>
                         <div class="w-11 h-11 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white">
@@ -198,12 +197,12 @@
                         <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
                             QUADRO DE DESENHO
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-blue-100 mt-1 tracking-wide">
+                        <p class="font-bingo text-sm font-extrabold text-blue-100 mt-1 tracking-wide">
                             Pinte e crie suas formas
                         </p>
                     </div>
 
-                    <div class="w-full bg-papel-branco text-azul-escuro font-fredoka font-extrabold text-base py-3 px-4 border-2 border-azul-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
+                    <div class="w-full bg-papel-branco text-azul-escuro font-bingo font-extrabold text-base py-3 px-4 border-2 border-azul-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
                         <span>ABRIR QUADRO</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -214,7 +213,7 @@
                 <!-- CARD 4: MINHAS MEDALHAS -->
                 <div id="card-medalhas" onclick="abrirModulo('Minhas Medalhas')" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-leve-direita bg-amarelo-vibrante text-tinta-escura cartao-borda-amarela cartao-arredondado p-6 shadow-sombra-cartum-amarela flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
-                        <span class="bg-papel-branco text-amarelo-escuro font-fredoka text-xs font-extrabold px-3 py-1 border-2 border-amarelo-escuro rounded-xl">
+                        <span class="bg-papel-branco text-amarelo-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-amarelo-escuro rounded-xl">
                             PRÊMIOS
                         </span>
                         <div class="w-11 h-11 bg-black/10 border-2 border-amarelo-escuro rounded-2xl flex items-center justify-center text-tinta-escura">
@@ -228,12 +227,12 @@
                         <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-tinta-escura tracking-wider">
                             MINHAS MEDALHAS
                         </h3>
-                        <p class="font-nunito text-sm font-extrabold text-yellow-900 mt-1 tracking-wide">
+                        <p class="font-bingo text-sm font-extrabold text-yellow-900 mt-1 tracking-wide">
                             Veja suas conquistas
                         </p>
                     </div>
 
-                    <div class="w-full bg-amarelo-escuro text-white font-fredoka font-extrabold text-base py-3 px-4 rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-verde-vibrante transition-colors">
+                    <div class="w-full bg-amarelo-escuro text-white font-bingo font-extrabold text-base py-3 px-4 rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-verde-vibrante transition-colors">
                         <span>VER MEDALHAS</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -246,12 +245,12 @@
         </main>
 
         <!-- RODAPÉ INTERNO -->
-        <footer id="rodape-principal" class="w-full pt-4 mt-6 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm font-fredoka font-bold text-gray-700">
+        <footer id="rodape-principal" class="w-full pt-4 mt-6 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm font-bingo font-bold text-gray-700">
             <div class="flex items-center gap-2">
                 <span class="w-3.5 h-3.5 bg-verde-vibrante border border-tinta-escura rounded-full inline-block"></span>
                 <span>PÁGINA 01 DE ATIVIDADES</span>
             </div>
-            <div class="bg-papel-claro borda-tinta-escura px-3 py-1.5 rounded-xl text-tinta-escura uppercase font-extrabold shadow-sm">
+            <div class="bg-papel-claro borda-tinta-escura px-3 py-1.5 rounded-xl text-tinta-escura uppercase font-extrabold shadow-sm font-bingo">
                 PROTÓTIPO V3 - CARDS VIBRANTES & BRANCO VIVO
             </div>
         </footer>
