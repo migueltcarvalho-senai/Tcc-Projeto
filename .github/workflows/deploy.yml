@@ -7,14 +7,14 @@ on:
 
 jobs:
   deploy:
-    name: Publicar no servidor
+    name: Bora que Bora
     runs-on: ubuntu-latest
 
     steps:
       - name: Baixar o código do repositório
         uses: actions/checkout@v4
 
-      - name: Publicar via FTP
+      - name: Mandar Bala via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
@@ -22,6 +22,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: /htdocs/
+          retries: 3
+          retryDelay: 10
           exclude: |
             **/.git*
             **/.git*/**
