@@ -123,7 +123,7 @@
             <div id="grade-atividades" class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2 py-4">
                 
                 <!-- CARD 1: JOGO DE INGLÊS -->
-                <a id="card-ingles" href="jogo-ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-ingles" href="temas-ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-verde-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
                             JOGO 01
@@ -150,25 +150,23 @@
                     </div>
                 </a>
 
-                <!-- CARD 2: PORTUGUÊS / LEITURA -->
-                <div id="card-portugues" onclick="abrirModulo('Leitura e Palavras')" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group">
+                <!-- CARD 2: JOGO DOS BALÕES -->
+                <a id="card-baloes" href="temas-baloes.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-laranja-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
                             JOGO 02
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-laranja-escuro rounded-2xl flex items-center justify-center text-white">
-                            <svg class="w-7 h-7 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                            </svg>
+                        <div class="w-11 h-11 bg-white/25 border-2 border-laranja-escuro rounded-2xl flex items-center justify-center text-white text-2xl">
+                            🎈
                         </div>
                     </div>
                     
                     <div class="my-4">
                         <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
-                            LEITURA E PALAVRAS
+                            ESTOURE OS BALÕES
                         </h3>
                         <p class="font-bingo text-sm font-extrabold text-orange-100 mt-1 tracking-wide">
-                            Forme palavras e frases
+                            Pop balloons to build sentences!
                         </p>
                     </div>
 
@@ -178,7 +176,7 @@
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
                     </div>
-                </div>
+                </a>
 
                 <!-- CARD 3: ARTE / QUADRO -->
                 <div id="card-desenho" onclick="abrirModulo('Desenho e Arte')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-6 shadow-sombra-cartum-azul flex flex-col justify-between min-h-[250px] cursor-pointer group">

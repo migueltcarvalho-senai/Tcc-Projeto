@@ -8,37 +8,113 @@
    require_once 'config/config.php';
 
    $id_jogo = 1;
-   $sql = "
-       SELECT
-           p.`id`,
-           p.`primeira parte`   AS primeira_parte,
-           p.`resposta`,
-           p.`segunda parte`    AS segunda_parte,
-           c.`conjunto`
-       FROM `Pergunta` p
-       LEFT JOIN `Conjunto de respostas erradas` c ON c.`Pergunta_id` = p.`id`
-       WHERE p.`Jogo_id` = ?
-       ORDER BY p.`id` ASC
-   ";
-   $stmt = $conn->prepare($sql);
-   $stmt->bind_param("i", $id_jogo);
-   $stmt->execute();
-   $resultado = $stmt->get_result();
 
-   $perguntas = [];
-   while ($linha = $resultado->fetch_assoc()) {
-       $perguntas[] = [
-           'id'             => (int) $linha['id'],
-           'primeira_parte' => $linha['primeira_parte'] ?? '',
-           'resposta'       => $linha['resposta'],
-           'segunda_parte'  => $linha['segunda_parte'] ?? '',
-           'erradas'        => json_decode($linha['conjunto'] ?? '[]', true) ?: [],
+   // 1. Obter todos os temas disponíveis para o jogo de inglês
+   $sql_temas = "
+       SELECT
+           t.`id`,
+           t.`nome`,
+           COUNT(p.`id`) AS total_perguntas
+       FROM `Tema` t
+       LEFT JOIN `Pergunta` p ON p.`id_tema` = t.`id`
+       WHERE t.`id_jogo` = ? OR t.`id_jogo` IS NULL
+       GROUP BY t.`id`, t.`nome`
+       ORDER BY t.`id` ASC
+   ";
+   $stmt_temas = $conn->prepare($sql_temas);
+   $stmt_temas->bind_param("i", $id_jogo);
+   $stmt_temas->execute();
+   $res_temas = $stmt_temas->get_result();
+
+   $temas_disponiveis = [];
+   while ($t = $res_temas->fetch_assoc()) {
+       $temas_disponiveis[] = [
+           'id'              => (int) $t['id'],
+           'nome'            => $t['nome'],
+           'total_perguntas' => (int) $t['total_perguntas'],
        ];
    }
-   $stmt->close();
+   $stmt_temas->close();
+
+   // 2. Determinar o tema selecionado via GET (aceita id_tema numérico ou nome do tema)
+   $tema_param = $_GET['tema'] ?? $_GET['id_tema'] ?? null;
+   $tema_ativo = null;
+
+   if (!empty($temas_disponiveis)) {
+       if ($tema_param !== null && $tema_param !== '') {
+           foreach ($temas_disponiveis as $t) {
+               if ((string) $t['id'] === (string) $tema_param || strcasecmp($t['nome'], (string) $tema_param) === 0) {
+                   $tema_ativo = $t;
+                   break;
+               }
+           }
+       }
+
+       // Se nenhum tema foi especificado ou encontrado, usa o primeiro tema
+       if (!$tema_ativo) {
+           $tema_ativo = $temas_disponiveis[0];
+       }
+   }
+
+   // 3. Buscar as perguntas do tema selecionado usando SELECT * em Pergunta
+   $perguntas = [];
+   if ($tema_ativo) {
+       $sql_perguntas = "
+           SELECT
+               p.*,
+               t.`nome` AS tema_nome,
+               c.`conjunto`
+           FROM `Pergunta` p
+           INNER JOIN `Tema` t ON t.`id` = p.`id_tema`
+           LEFT JOIN `Conjunto de respostas erradas` c ON c.`Pergunta_id` = p.`id`
+           WHERE p.`id_tema` = ?
+           ORDER BY p.`id` ASC
+       ";
+       $stmt_perguntas = $conn->prepare($sql_perguntas);
+       $stmt_perguntas->bind_param("i", $tema_ativo['id']);
+       $stmt_perguntas->execute();
+       $res_perguntas = $stmt_perguntas->get_result();
+
+       while ($linha = $res_perguntas->fetch_assoc()) {
+           $perguntas[] = [
+               'id'             => (int) $linha['id'],
+               'primeira_parte' => $linha['primeira parte'] ?? $linha['primeira_parte'] ?? '',
+               'resposta'       => $linha['resposta'],
+               'segunda_parte'  => $linha['segunda parte'] ?? $linha['segunda_parte'] ?? '',
+               'id_tema'        => (int) ($linha['id_tema'] ?? 0),
+               'tema_nome'      => $linha['tema_nome'] ?? '',
+               'erradas'        => json_decode($linha['conjunto'] ?? '[]', true) ?: [],
+           ];
+       }
+       $stmt_perguntas->close();
+   }
 
 // Randomiza a ordem das perguntas a cada carregamento da página
 shuffle($perguntas);
+
+// Lista de fundos disponíveis para a lacuna (cores sortidas da pasta fundo-resposta-completar)
+$fundos_disponiveis = [
+    'fundo-resposta-completar/1.png',
+    'fundo-resposta-completar/2.png',
+    'fundo-resposta-completar/3.png',
+    'fundo-resposta-completar/4.png',
+    'fundo-resposta-completar/5.png',
+    'fundo-resposta-completar/6.png',
+    'fundo-resposta-completar/7.png',
+];
+
+// Atribui um fundo randomizado para cada pergunta, garantindo cores sortidas e alternadas entre frases
+$total_fundos = count($fundos_disponiveis);
+$ultimo_fundo_idx = -1;
+foreach ($perguntas as &$p) {
+    do {
+        $novo_fundo_idx = mt_rand(0, $total_fundos - 1);
+    } while ($total_fundos > 1 && $novo_fundo_idx === $ultimo_fundo_idx);
+
+    $p['fundo_lacuna'] = $fundos_disponiveis[$novo_fundo_idx];
+    $ultimo_fundo_idx = $novo_fundo_idx;
+}
+unset($p);
 
 $total_perguntas = count($perguntas);
 
@@ -132,15 +208,29 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
         <header id="cabecalho-jogo"
                 class="w-full flex flex-wrap items-center justify-between gap-4 pb-4 mb-4">
 
-            <!-- Botão Voltar -->
-            <a href="index.php"
-               class="cartao-dinamico flex items-center gap-2 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca font-bingo font-bold text-sm text-tinta-escura"
+            <!-- Botão Voltar para Seleção de Temas -->
+            <a href="temas-ingles.php"
+               class="cartao-dinamico flex items-center gap-2 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca font-bingo font-bold text-sm text-tinta-escura hover:bg-yellow-100 transition-colors"
                style="text-decoration: none;">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                     <path d="M19 12H5M12 5l-7 7 7 7"/>
                 </svg>
-                BACK
+                TOPICS
             </a>
+
+            <!-- Badge do Tema Ativo -->
+            <?php if ($tema_ativo): ?>
+            <div id="badge-tema-ativo"
+                 class="flex items-center gap-2.5 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
+                <span class="text-lg">🏷️</span>
+                <div>
+                    <span class="block text-[10px] font-black text-azul-escuro uppercase tracking-wider font-bingo">TOPIC</span>
+                    <span class="block font-bingo text-sm font-extrabold text-tinta-escura uppercase leading-none">
+                        <?= htmlspecialchars($tema_ativo['nome']) ?>
+                    </span>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- Placar -->
             <div id="placar-jogo"
@@ -169,6 +259,20 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 </p>
             </div>
 
+            <!-- SELETOR DE TEMAS (exibido quando houver mais de um tema disponível) -->
+            <?php if (count($temas_disponiveis) > 1): ?>
+            <div id="seletor-temas" class="flex flex-wrap items-center justify-center gap-2 -mt-2">
+                <span class="font-bingo font-black text-xs text-gray-500 uppercase tracking-widest mr-1">TOPICS:</span>
+                <?php foreach ($temas_disponiveis as $t): ?>
+                    <a href="jogo-ingles.php?tema=<?= urlencode($t['id']) ?>"
+                       class="cartao-dinamico px-3.5 py-1.5 rounded-xl font-bingo font-bold text-xs border-2 border-tinta-escura transition-all <?= ($tema_ativo && $tema_ativo['id'] === $t['id']) ? 'bg-amarelo-vibrante text-tinta-escura shadow-sombra-cartum-branca scale-105' : 'bg-papel-claro text-gray-600 hover:bg-white' ?>"
+                       style="text-decoration: none;">
+                        <?= htmlspecialchars(ucfirst($t['nome'])) ?> (<?= $t['total_perguntas'] ?>)
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
             <!-- BARRA DE PROGRESSO -->
             <div class="w-full max-w-lg">
                 <div class="flex justify-between items-center mb-1 font-bingo font-bold text-sm text-gray-600">
@@ -189,7 +293,15 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 </p>
                 <div class="texto-pergunta">
                     <span id="texto-primeira-parte"></span>
-                    <span id="lacuna-resposta" class="lacuna">_____</span>
+                    <span id="conteiner-lacuna" class="conteiner-lacuna">
+                        <img id="fundo-lacuna-img"
+                             class="fundo-lacuna-img"
+                             src="<?= htmlspecialchars($perguntas[0]['fundo_lacuna'] ?? 'fundo-resposta-completar/1.png') ?>"
+                             alt="Fundo colorido da lacuna"
+                             aria-hidden="true"
+                             draggable="false">
+                        <span id="lacuna-resposta" class="lacuna">_____</span>
+                    </span>
                     <span id="texto-segunda-parte"></span>
                 </div>
             </div>
@@ -216,10 +328,10 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                     No questions found.<br>
                     Add questions to the database first!
                 </p>
-                <a href="index.php"
+                <a href="temas-ingles.php"
                    class="botao-acao mt-6 bg-azul-vibrante text-white inline-flex"
                    style="text-decoration:none;">
-                    ← Go Back
+                    ← Back to Topics
                 </a>
             </div>
             <?php endif; ?>
@@ -234,7 +346,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 <span>ENGLISH FOR KIDS — GAME 01</span>
             </div>
             <div class="bg-papel-claro borda-tinta-escura px-3 py-1.5 rounded-xl text-tinta-escura uppercase font-extrabold shadow-sm font-bingo">
-                COMPLETE THE SENTENCE
+                COMPLETE THE SENTENCE<?= $tema_ativo ? ' — ' . htmlspecialchars(strtoupper($tema_ativo['nome'])) : '' ?>
             </div>
         </footer>
 
@@ -266,10 +378,15 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                         class="botao-acao bg-verde-vibrante text-white">
                     🔄 Play Again
                 </button>
+                <a href="temas-ingles.php"
+                   class="botao-acao bg-amarelo-vibrante text-tinta-escura"
+                   style="text-decoration: none;">
+                    📌 Other Topics
+                </a>
                 <a href="index.php"
                    class="botao-acao bg-papel-claro text-tinta-escura"
                    style="text-decoration: none;">
-                    🏠 Go Back
+                    🏠 Menu
                 </a>
             </div>
 
@@ -299,6 +416,8 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
     const elPrimeiraParte    = document.getElementById('texto-primeira-parte');
     const elSegundaParte     = document.getElementById('texto-segunda-parte');
     const elLacuna           = document.getElementById('lacuna-resposta');
+    const elConteinerLacuna  = document.getElementById('conteiner-lacuna');
+    const elFundoLacunaImg   = document.getElementById('fundo-lacuna-img');
     const elGradeOpcoes      = document.getElementById('grade-opcoes');
     const elFeedback         = document.getElementById('area-feedback');
     const elPlacar           = document.getElementById('texto-placar');
@@ -310,6 +429,21 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
     const elEmojiResultado   = document.getElementById('emoji-resultado');
     const elTituloResultado  = document.getElementById('titulo-resultado');
     const elTextoResultado   = document.getElementById('texto-resultado');
+
+    /* Pré-carregamento dos 7 fundos para evitar atrasos na troca */
+    const LISTA_FUNDOS = [
+        'fundo-resposta-completar/1.png',
+        'fundo-resposta-completar/2.png',
+        'fundo-resposta-completar/3.png',
+        'fundo-resposta-completar/4.png',
+        'fundo-resposta-completar/5.png',
+        'fundo-resposta-completar/6.png',
+        'fundo-resposta-completar/7.png'
+    ];
+    LISTA_FUNDOS.forEach(src => {
+        const img = new Image();
+        img.src = src;
+    });
 
     /* ----------------------------------------------------------
        Carrega a pergunta atual
@@ -323,11 +457,19 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
         respondeuAtual = false;
         const p = PERGUNTAS[indicePerguntaAtual];
 
+        // Atualiza a imagem de fundo atrás da lacuna com a cor sorteada para esta pergunta
+        if (elFundoLacunaImg && p.fundo_lacuna) {
+            elFundoLacunaImg.src = p.fundo_lacuna;
+        }
+
         elPrimeiraParte.textContent = p.primeira_parte;
         elSegundaParte.textContent  = p.segunda_parte;
 
         elLacuna.textContent = '_____';
         elLacuna.className   = 'lacuna';
+        if (elConteinerLacuna) {
+            elConteinerLacuna.className = 'conteiner-lacuna';
+        }
 
         elFeedback.textContent = '';
         elFeedback.style.color = '';
@@ -378,6 +520,9 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
             cardClicado.classList.add('opcao-correta');
             elLacuna.textContent = escolha;
             elLacuna.classList.add('lacuna-correta');
+            if (elConteinerLacuna) {
+                elConteinerLacuna.classList.add('lacuna-acertou');
+            }
 
             elFeedback.textContent = '✅ Correct! Well done! 🌟';
             elFeedback.style.color = '#054D20';
@@ -392,6 +537,9 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
             cardClicado.classList.add('opcao-errada');
             elLacuna.textContent = escolha;
             elLacuna.classList.add('lacuna-errada');
+            if (elConteinerLacuna) {
+                elConteinerLacuna.classList.add('lacuna-errou');
+            }
 
             elFeedback.textContent = '❌ Try again! You can do it! 💪';
             elFeedback.style.color = '#b91c1c';
@@ -401,6 +549,9 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 cardClicado.classList.remove('opcao-errada');
                 elLacuna.textContent = '_____';
                 elLacuna.className   = 'lacuna';
+                if (elConteinerLacuna) {
+                    elConteinerLacuna.classList.remove('lacuna-errou');
+                }
                 elFeedback.textContent = '';
                 elFeedback.style.color = '';
             }, 900);

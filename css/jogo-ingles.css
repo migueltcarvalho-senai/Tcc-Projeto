@@ -142,29 +142,64 @@ body {
     line-height: 1.8;
 }
 
-/* A lacuna / gap (underscore estilizado) */
+/* ============================================================
+   ÁREA DA PERGUNTA (gap fill com fundo colorido sorteado)
+   ============================================================ */
+
+/* Container da lacuna para comportar a fita de papel rasgado colorida */
+.conteiner-lacuna {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin: 0.2rem 0.4rem;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Fundo PNG colorido sorteado colocado atrás do campo Gap */
+.fundo-lacuna-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% + 32px);
+    height: calc(100% + 20px);
+    min-width: 140px;
+    min-height: 56px;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+    filter: drop-shadow(0 4px 3px rgba(15, 23, 42, 0.22));
+    transition: filter 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* O campo da lacuna / gap posicionado sobre a fita colorida */
 .lacuna {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 120px;
     height: 48px;
-    background: #fff8dc;
-    border-bottom: 5px solid #0F172A;
+    background: transparent;
+    border-bottom: 4px dashed rgba(15, 23, 42, 0.65);
     border-radius: 6px;
-    padding: 0 1rem;
+    padding: 0 1.2rem;
     font-family: 'Gooddog', cursive, sans-serif;
-    font-size: 1.5rem;
-    letter-spacing: 0.08em;
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
     color: #0F172A;
-    transition: all 0.3s ease;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     vertical-align: middle;
     position: relative;
+    z-index: 2;
 }
 
 /* Estado: resposta inserida na lacuna */
 .lacuna.lacuna-preenchida {
-    background: #d1fae5;
     border-color: #054D20;
     color: #054D20;
     font-weight: bold;
@@ -172,18 +207,35 @@ body {
 
 /* Estado: resposta errada piscando */
 .lacuna.lacuna-errada {
-    background: #fee2e2;
     border-color: #b91c1c;
     color: #b91c1c;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
     animation: piscar-erro 0.5s ease;
+}
+
+.conteiner-lacuna.lacuna-errou {
+    animation: piscar-erro 0.5s ease;
+}
+
+.conteiner-lacuna.lacuna-errou .fundo-lacuna-img {
+    filter: drop-shadow(0 4px 6px rgba(185, 28, 28, 0.6));
 }
 
 /* Estado: resposta correta confirmada */
 .lacuna.lacuna-correta {
-    background: #d1fae5;
     border-color: #054D20;
+    border-bottom-style: solid;
     color: #054D20;
-    box-shadow: 0 4px 0 #054D20;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+    transform: scale(1.05);
+}
+
+.conteiner-lacuna.lacuna-acertou {
+    transform: scale(1.05);
+}
+
+.conteiner-lacuna.lacuna-acertou .fundo-lacuna-img {
+    filter: drop-shadow(0 6px 8px rgba(5, 77, 32, 0.45));
 }
 
 @keyframes piscar-erro {
@@ -368,7 +420,15 @@ body {
     .lacuna {
         min-width: 90px;
         height: 40px;
-        font-size: 1.2rem;
+        font-size: 1.25rem;
+        padding: 0 0.8rem;
+    }
+
+    .fundo-lacuna-img {
+        width: calc(100% + 22px);
+        height: calc(100% + 14px);
+        min-width: 105px;
+        min-height: 46px;
     }
 
     .cartao-opcao {

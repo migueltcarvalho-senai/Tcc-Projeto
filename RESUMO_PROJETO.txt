@@ -114,30 +114,45 @@ Foco Pedagógico Atual: Língua Inglesa (English for Kids)
 - Banco de Dados: `tccdb`
 - Conexão: config/config.php (host localhost:3308, usuário root)
 - Script de Migração: banco/jogo_ingles_migration.sql
-- Estrutura Relacional Criada:
+- Estrutura Relacional Atualizada:
   1. Tabela `Jogo`:
      - id (INT, PK, AUTO_INCREMENT)
-     - nome (INT)
+     - nome (VARCHAR)
      - descricao (VARCHAR)
 
-  2. Tabela `Pergunta`:
+  2. Tabela `Tema`:
+     - id (INT, PK, AUTO_INCREMENT)
+     - id_jogo (INT, FK referenciando Jogo.id)
+     - nome (VARCHAR)
+
+  3. Tabela `Pergunta`:
      - id (INT, PK, AUTO_INCREMENT)
      - primeira parte (VARCHAR)
      - resposta (VARCHAR)
      - segunda parte (VARCHAR)
-     - Jogo_id (INT, FK referenciando Jogo.id)
+     - id_tema (INT, FK referenciando Tema.id)
 
-  3. Tabela `Conjunto de respostas erradas`:
+  4. Tabela `Conjunto de respostas erradas`:
      - id (INT, PK, AUTO_INCREMENT)
      - nome do conjunto (VARCHAR)
      - conjunto (JSON contendo o array de respostas erradas)
      - Pergunta_id (INT, FK referenciando Pergunta.id)
 
+  5. Tabela `Frases` (Novo - Jogo 2: Estoure os Balões):
+     - id (INT, PK, AUTO_INCREMENT)
+     - frase (VARCHAR(500) - Frase completa para construção)
+     - id_tema (INT, FK referenciando Tema.id)
+
+- Jogos Cadastrados no Banco:
+  * Jogo 1: 'complete sentence' (Gap Fill Quiz com fita colorida e post-its de tema)
+  * Jogo 2: 'ballons' (Estoure os Balões - montagem de frases com balões verdes interativos)
+
 - Integração PHP/MySQL:
-  * Query com INNER/LEFT JOIN e Prepared Statement (segurança contra
-    SQL Injection).
-  * Decodificação nativa do campo JSON (`conjunto`) via json_decode() para
-    misturar com a resposta correta.
+  * Consultas preparadas (Prepared Statements) parametrizadas por tema (`p.id_tema = ?` e `f.id_tema = ?`)
+    e jogo (`t.id_jogo = ?`), garantindo imunidade a SQL Injection.
+  * Suporte a separação de quizzes e frases por tema via query string (`?tema=1`, `?tema=7`, etc.).
+  * No Jogo dos Balões, o método `explode(' ', $frase)` do PHP é utilizado para decompor a frase em
+    palavras e transferi-las com a frase de controle para o motor do jogo.
 
 --------------------------------------------------------------------------------
 7. MAPA ATUAL DE ARQUIVOS DO PROJETO
@@ -146,23 +161,35 @@ c:\Users\sesi2b\laragon\www\Tcc-Projeto\
 │
 ├── index.html                   # Página inicial estática (HTML/Tailwind)
 ├── index.php                    # Página inicial dinâmica (PHP)
-├── jogo-ingles.php              # Página do 1º Jogo de Inglês (Gap Fill Quiz)
+├── temas-ingles.php             # Seleção de Temas - Jogo 1 (Post-its lúdicos)
+├── jogo-ingles.php              # Jogo 1: Complete the Sentence (Gap Fill Quiz)
+├── temas-baloes.php             # Seleção de Temas - Jogo 2: Estoure os Balões
+├── jogo-baloes.php              # Jogo 2: Estoure os Balões (Build the Sentence)
 ├── RESUMO_PROJETO.txt           # Este documento de histórico e status
 │
 ├── css/
 │   ├── index.css                # Estilos da página index.html
 │   ├── index-php.css            # Estilos da página index.php
-│   └── jogo-ingles.css          # Estilos do jogo de inglês
+│   ├── temas-ingles.css         # Estilos da seleção de temas (post-its)
+│   ├── jogo-ingles.css          # Estilos do jogo de preencher frases
+│   └── jogo-baloes.css          # Estilos do jogo dos balões (céu azul, explosão, slots)
+│
+├── baloes/
+│   └── verde/
+│       ├── inteiro/             # Frames do balão verde oscilante (00 a 36 e 46)
+│       └── Exploding/           # Frames da explosão do balão (37 a 45)
 │
 ├── fonts/
 │   ├── good_dog/gooddog.TTF     # Fonte para títulos principais
 │   ├── bingo/BINGO.ttf          # Fonte para textos secundários
 │   ├── child_dream_2/dream.ttf  # Fonte alternativa Dream
-│   └── cute_dolphin/            # Fonte Cute Dolphin
+│   └── cute_dolphin/            # Fonte Cute Dolphin (títulos dos post-its)
+│
+├── post-it/                     # Imagens PNG de post-its estilizados (1.png a 6.png)
+├── fundo-resposta-completar/    # Fitas de papel colorido para o Gap (1.png a 7.png)
 │
 ├── banco/
-│   ├── TCCdb_Prototipo.sql      # Dump/esquema original prévio
-│   └── jogo_ingles_migration.sql # Script SQL oficial do jogo de inglês
+│   └── jogo_ingles_migration.sql # Script SQL oficial (Jogos 1 e 2, Temas, Perguntas e Frases)
 │
 └── config/
     ├── config.php               # Conexão centralizada com o banco tccdb
@@ -170,3 +197,4 @@ c:\Users\sesi2b\laragon\www\Tcc-Projeto\
 ================================================================================
 FIM DO RELATÓRIO
 ================================================================================
+
