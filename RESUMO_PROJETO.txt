@@ -2,7 +2,7 @@
           HISTÓRICO E RESUMO DE DESENVOLVIMENTO - PROJETO TCC
          SKETCHBOOK EDUCACIONAL INTERATIVO (ENSINO FUNDAMENTAL 1)
 ================================================================================
-Data de Atualização: 09/10/2026
+Data de Atualização: 21/10/2026
 Ambiente de Execução: Laragon (Apache, PHP 8.x, MySQL 8.x / porta 3308)
 Público-Alvo: Crianças de 6 a 9 anos (Ensino Fundamental 1)
 Foco Pedagógico Atual: Língua Inglesa (English for Kids)
@@ -109,70 +109,157 @@ Foco Pedagógico Atual: Língua Inglesa (English for Kids)
     Fisher-Yates no JavaScript a cada pergunta.
 
 --------------------------------------------------------------------------------
-6. BANCO DE DADOS E ARQUITETURA DE DADOS (MYSQL)
+6. PÁGINAS DE SELEÇÃO DE TEMAS (POST-ITS ESTILIZADOS)
+--------------------------------------------------------------------------------
+- Arquivos:
+  * temas-ingles.php (Seleção de temas do Jogo 1 — Complete the Sentence)
+  * temas-baloes.php (Seleção de temas do Jogo 2 — Estoure os Balões)
+- Folha de Estilo Compartilhada: css/temas-ingles.css
+- Características Visuais e Interativas:
+  * Layout em formato de folha de caderno com espirais no topo e fundo papelão.
+  * Cards em formato de post-it estilizados utilizando os assets da pasta
+    `post-it/` (designs 1.png a 6.png).
+  * Algoritmo de alternância cíclica garantindo que dois post-its de mesmo
+    design nunca fiquem lado a lado na grade.
+  * Inclinações lúdicas alternadas (postit-inclinado-1 a 6) com desentortamento
+    suave no hover (transition cubic-bezier).
+  * Tamanho ampliado dos post-its (max-width: 360px) com espaçamento generoso.
+  * Todas as fontes padronizadas na cor preta (#0F172A) para contraste e
+    acessibilidade ideal para crianças em fase de alfabetização.
+  * Remoção completa de emojis de alfinete (📌) para visual limpo e moderno.
+  * Títulos dos temas estilizados com a fonte personalizada "Cute Dolphin".
+  * Submissão via formulário HTML com botões do tipo submit enviando o parâmetro
+    `GET tema` (contendo o ID do tema) para a respectiva página do jogo.
+
+--------------------------------------------------------------------------------
+7. DESENVOLVIMENTO DO SEGUNDO JOGO: ESTOURE OS BALÕES (SENTENCE BUILDER)
+--------------------------------------------------------------------------------
+- Arquivo Principal: jogo-baloes.php
+- Folha de Estilo: css/jogo-baloes.css
+- Objetivo Pedagógico:
+  * Desenvolvimento da lógica linguística, ordem sintática (Subject + Verb + Object)
+    e associação semântica em língua inglesa para crianças de 6 a 9 anos.
+- Cenário Visual e Identidade:
+  * Fundo em degradê azul céu (#87CEEB -> #E3F4FC) com nuvens brancas
+    flutuantes animadas em segundo plano via CSS @keyframes.
+  * Caderno escolar com espirais no topo, molduras em tinta escura e sombras cartum.
+  * Quadro azul ampliado (.area-baloes) com 540px de altura e container max-w-5xl,
+    fornecendo um campo visual panorâmico e arejado para as crianças.
+- Motor de Animação dos Balões (Sprite Frame Cycling):
+  * Utiliza frames individuais em formato GIF da pasta `baloes/verde/`:
+    - Inteiro / Flutuação: 37 frames (frame_00_delay-0.06s.gif a frame_36 + frame_46).
+      O JavaScript cicla as imagens a cada 75ms gerando oscilação contínua e realista.
+    - Explosão (Pop): 9 frames (frame_37_delay-0.06s.gif a frame_45).
+      Ao ser clicado, o balão troca imediatamente para a sequência de explosão e
+      desaparece suavemente após 540ms.
+  * Balões ampliados para 165px x 198px (desktop) e textos com fonte Bingo de até
+    1.65rem em alto contraste com contorno preto 360° em volta das letras.
+  * Escala inteligente de fonte: palavras com mais letras (como "sleeping", "morning",
+    "carrots") têm sua fonte ajustada automaticamente para caber 100% no balão
+    sem cortes nem truncamentos.
+- Algoritmo de Posicionamento com Margem de Segurança Estrita (Zero Overlap):
+  * Elimina qualquer risco de sobreposição entre balões:
+    - Margem mínima de segurança de 32px das bordas do quadro e 40px+ entre balões.
+    - Distribuição geométrica calibrada conforme a quantidade de palavras:
+      * 1 a 3 balões: Linha horizontal única centralizada com >100px de vão livre.
+      * 4 balões: Grade 2x2 com ampla separação horizontal (>150px) e vertical (>64px).
+      * 5 balões (Padrão Quinconce): 3 balões no topo e 2 balões embaixo posicionados
+        exatamente nos vãos entre os de cima, impedindo colisões em ambos os eixos.
+      * 6 balões: 2 linhas bem espaçadas (topo e base) com colunas intercaladas.
+  * Amplitudes de flutuação vertical ajustadas para máximo de 6px a 7px, garantindo
+    que os balões flutuem com dinamismo sem invadir a margem do vizinho.
+- Mecânica e Lógica do Jogo:
+  1. O PHP busca as frases do tema escolhido (`WHERE f.id_tema = ?`).
+  2. A frase é decomposta em palavras individuais através do método nativo
+     `explode(' ', $frase)` e a frase completa é guardada na variável de controle.
+  3. No cliente (JS), as palavras são embaralhadas e associadas aos balões.
+  4. Ao clicar em cada balão:
+     - O balão explode com a animação de 9 frames;
+     - A palavra é enviada para a área "Sentence Builder" preenchendo os slots na ordem;
+  5. Ao selecionar todas as palavras da frase:
+     - O sistema compara a frase montada com a variável da frase de controle.
+     - SE CORRETA: feedback sonoro/visual verde ("EXCELLENT!"), slots iluminados e
+       avanço automático para a próxima frase do tema.
+     - SE INCORRETA: feedback vermelho de erro com tremor ("OOPS! TRY AGAIN!"),
+       limpeza dos slots e reorganização automática com novo sorteio dos balões na tela
+       para a criança tentar novamente até acertar.
+  6. Recursos Adicionais:
+     - Botão "RESET WORDS" para reiniciar as palavras da frase atual quando desejado;
+     - Barra de progresso dinâmica e placar de pontuação em tempo real;
+     - Overlay de vitória final com opções de jogar novamente, escolher outro tema ou ir ao menu.
+  7. Respeito ao Banco de Dados (Clean Code):
+     - Todos os inserts em tempo de execução foram removidos do código PHP; o jogo
+       depende exclusivamente das tabelas provisionadas no banco MySQL via migração.
+
+--------------------------------------------------------------------------------
+8. BANCO DE DADOS E ARQUITETURA DE DADOS (MYSQL)
 --------------------------------------------------------------------------------
 - Banco de Dados: `tccdb`
 - Conexão: config/config.php (host localhost:3308, usuário root)
-- Script de Migração: banco/jogo_ingles_migration.sql
-- Estrutura Relacional Atualizada:
+- Script de Migração Oficial: banco/jogo_ingles_migration.sql
+- Padronização de Colunas:
+  * Todas as referências à chave estrangeira de temas foram uniformizadas para a
+    coluna oficial `id_tema` em todas as tabelas, queries SQL e parâmetros PHP.
+- Estrutura Relacional Atualizada (5 Tabelas):
   1. Tabela `Jogo`:
      - id (INT, PK, AUTO_INCREMENT)
-     - nome (VARCHAR)
+     - nome (VARCHAR) — ex.: 'complete sentence', 'ballons'
      - descricao (VARCHAR)
 
   2. Tabela `Tema`:
      - id (INT, PK, AUTO_INCREMENT)
      - id_jogo (INT, FK referenciando Jogo.id)
-     - nome (VARCHAR)
+     - nome (VARCHAR) — ex.: 'animals', 'colors', 'daily life', 'nature', 'food'
 
-  3. Tabela `Pergunta`:
+  3. Tabela `Pergunta` (Jogo 1: Complete the Sentence):
      - id (INT, PK, AUTO_INCREMENT)
      - primeira parte (VARCHAR)
      - resposta (VARCHAR)
      - segunda parte (VARCHAR)
      - id_tema (INT, FK referenciando Tema.id)
 
-  4. Tabela `Conjunto de respostas erradas`:
+  4. Tabela `Conjunto de respostas erradas` (Jogo 1):
      - id (INT, PK, AUTO_INCREMENT)
      - nome do conjunto (VARCHAR)
-     - conjunto (JSON contendo o array de respostas erradas)
+     - conjunto (JSON contendo o array de distratores/respostas erradas)
      - Pergunta_id (INT, FK referenciando Pergunta.id)
 
-  5. Tabela `Frases` (Novo - Jogo 2: Estoure os Balões):
+  5. Tabela `Frases` (Jogo 2: Estoure os Balões):
      - id (INT, PK, AUTO_INCREMENT)
-     - frase (VARCHAR(500) - Frase completa para construção)
+     - frase (VARCHAR(500) - Frase completa em inglês para construção)
      - id_tema (INT, FK referenciando Tema.id)
 
-- Jogos Cadastrados no Banco:
-  * Jogo 1: 'complete sentence' (Gap Fill Quiz com fita colorida e post-its de tema)
-  * Jogo 2: 'ballons' (Estoure os Balões - montagem de frases com balões verdes interativos)
+- Jogos e Temas Cadastrados:
+  * Jogo 1: 'complete sentence' (id=1)
+    - Temas: animals (1), colors (2), food (3), school (4), family (5), sports (6)
+  * Jogo 2: 'ballons' (id=2)
+    - Temas: daily life (7), nature (8), animals (9), food (10)
+    - Frases: 20 frases de exemplo (3 a 5 palavras cada) distribuídas entre os temas 7 a 10.
 
-- Integração PHP/MySQL:
+- Segurança e Integração PHP/MySQL:
   * Consultas preparadas (Prepared Statements) parametrizadas por tema (`p.id_tema = ?` e `f.id_tema = ?`)
-    e jogo (`t.id_jogo = ?`), garantindo imunidade a SQL Injection.
+    e jogo (`t.id_jogo = ?`), garantindo imunidade a ataques de SQL Injection.
   * Suporte a separação de quizzes e frases por tema via query string (`?tema=1`, `?tema=7`, etc.).
-  * No Jogo dos Balões, o método `explode(' ', $frase)` do PHP é utilizado para decompor a frase em
-    palavras e transferi-las com a frase de controle para o motor do jogo.
 
 --------------------------------------------------------------------------------
-7. MAPA ATUAL DE ARQUIVOS DO PROJETO
+9. MAPA ATUAL DE ARQUIVOS DO PROJETO
 --------------------------------------------------------------------------------
 c:\Users\sesi2b\laragon\www\Tcc-Projeto\
 │
 ├── index.html                   # Página inicial estática (HTML/Tailwind)
-├── index.php                    # Página inicial dinâmica (PHP)
-├── temas-ingles.php             # Seleção de Temas - Jogo 1 (Post-its lúdicos)
+├── index.php                    # Página inicial dinâmica (PHP com cards interativos)
+├── temas-ingles.php             # Seleção de Temas — Jogo 1 (Post-its lúdicos)
 ├── jogo-ingles.php              # Jogo 1: Complete the Sentence (Gap Fill Quiz)
-├── temas-baloes.php             # Seleção de Temas - Jogo 2: Estoure os Balões
+├── temas-baloes.php             # Seleção de Temas — Jogo 2 (Post-its lúdicos)
 ├── jogo-baloes.php              # Jogo 2: Estoure os Balões (Build the Sentence)
-├── RESUMO_PROJETO.txt           # Este documento de histórico e status
+├── RESUMO_PROJETO.txt           # Este documento oficial de histórico e status
 │
 ├── css/
 │   ├── index.css                # Estilos da página index.html
 │   ├── index-php.css            # Estilos da página index.php
-│   ├── temas-ingles.css         # Estilos da seleção de temas (post-its)
-│   ├── jogo-ingles.css          # Estilos do jogo de preencher frases
-│   └── jogo-baloes.css          # Estilos do jogo dos balões (céu azul, explosão, slots)
+│   ├── temas-ingles.css         # Estilos da seleção de temas (post-its e cards)
+│   ├── jogo-ingles.css          # Estilos do jogo de preencher lacunas
+│   └── jogo-baloes.css          # Estilos do jogo dos balões (céu azul, slots, animações)
 │
 ├── baloes/
 │   └── verde/
@@ -180,8 +267,8 @@ c:\Users\sesi2b\laragon\www\Tcc-Projeto\
 │       └── Exploding/           # Frames da explosão do balão (37 a 45)
 │
 ├── fonts/
-│   ├── good_dog/gooddog.TTF     # Fonte para títulos principais
-│   ├── bingo/BINGO.ttf          # Fonte para textos secundários
+│   ├── good_dog/gooddog.TTF     # Fonte para títulos principais (Gooddog)
+│   ├── bingo/BINGO.ttf          # Fonte para textos, badges e botões (Bingo)
 │   ├── child_dream_2/dream.ttf  # Fonte alternativa Dream
 │   └── cute_dolphin/            # Fonte Cute Dolphin (títulos dos post-its)
 │
@@ -192,9 +279,10 @@ c:\Users\sesi2b\laragon\www\Tcc-Projeto\
 │   └── jogo_ingles_migration.sql # Script SQL oficial (Jogos 1 e 2, Temas, Perguntas e Frases)
 │
 └── config/
-    ├── config.php               # Conexão centralizada com o banco tccdb
+    ├── config.php               # Conexão centralizada com o banco tccdb (porta 3308)
     └── proteger.php             # Script auxiliar de proteção/sessão
 ================================================================================
 FIM DO RELATÓRIO
 ================================================================================
+
 
