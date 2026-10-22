@@ -5,7 +5,8 @@
    Schema: tccdb | Jogo ('ballons') → Tema → Frases
    ============================================================ */
 
-require_once 'config/config.php';
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/proteger.php';
 
 $id_jogo = 2;
 

@@ -1,16 +1,13 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$nomeUsuario = $_SESSION['user'] ?? 'Aprendiz Sabido';
-$estaLogado = isset($_SESSION['id']);
+require_once __DIR__ . '/config/proteger.php';
+$nomeUsuario = $_SESSION['user'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sketchbook Educacional - Protótipo TCC (6 a 9 Anos)</title>
+    <title>Sketchbook Educacional</title>
     <!-- Google Fonts: Fredoka e Nunito -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,39 +84,10 @@ $estaLogado = isset($_SESSION['id']);
         </div>
 
         <!-- BARRA SUPERIOR DO LIVRO -->
-        <header id="cabecalho-principal" class="w-full flex flex-wrap items-center justify-between gap-4 pb-4 mb-6">
-            
-            <!-- Perfil do Aluno com Selo Branco & Verde -->
-            <div id="perfil-aluno" class="flex items-center gap-3 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
-                <div class="w-9 h-9 bg-amarelo-vibrante borda-tinta-escura rounded-xl flex items-center justify-center font-bold">
-                    <svg class="w-5 h-5 text-tinta-escura" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider font-bingo">NÍVEL 1</span>
-                    <span class="block font-bingo text-base font-bold text-tinta-escura leading-none"><?= htmlspecialchars(mb_strtoupper($nomeUsuario)) ?></span>
-                </div>
-            </div>
-
-            <!-- Controle de Áudio -->
-            <div id="controle-audio" class="flex items-center gap-2">
-                <?php if ($estaLogado): ?>
-                    <a href="logout.php" title="Sair da conta" class="cartao-dinamico bg-red-500 hover:bg-red-600 text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-1 transition">
-                        <span>SAIR</span>
-                    </a>
-                <?php else: ?>
-                    <a href="login.php" title="Entrar na conta" class="cartao-dinamico bg-verde-vibrante hover:opacity-90 text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-1 transition">
-                        <span>ENTRAR</span>
-                    </a>
-                <?php endif; ?>
-                <button id="botao-ouvir-tela" onclick="toggleAudio()" class="cartao-dinamico bg-azul-vibrante text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-2">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-                    </svg>
-                    <span>OUVIR TELA</span>
-                </button>
-            </div>
+        <header id="cabecalho-principal" class="w-full flex items-center justify-end pb-3 mb-4">
+            <a href="logout.php" title="Encerrar sessão" class="cartao-dinamico bg-red-500 hover:bg-red-600 text-white borda-tinta-escura rounded-xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca transition-colors">
+                SAIR
+            </a>
         </header>
 
         <!-- SEÇÃO CENTRAL -->
@@ -144,8 +112,8 @@ $estaLogado = isset($_SESSION['id']);
                         <span class="bg-papel-branco text-verde-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
                             JOGO 01
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-verde-escuro rounded-2xl flex items-center justify-center text-white text-2xl">
-                            🇬🇧
+                        <div class="w-11 h-11 bg-white/25 border-2 border-verde-escuro rounded-xl flex items-center justify-center text-white font-bold text-sm tracking-wider">
+                            EN
                         </div>
                     </div>
                     
@@ -172,8 +140,10 @@ $estaLogado = isset($_SESSION['id']);
                         <span class="bg-papel-branco text-laranja-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
                             JOGO 02
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-laranja-escuro rounded-2xl flex items-center justify-center text-white text-2xl">
-                            🎈
+                        <div class="w-11 h-11 bg-white/25 border-2 border-laranja-escuro rounded-xl flex items-center justify-center text-white">
+                            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 2C8.69 2 6 4.69 6 8c0 4.25 4.5 8.5 5 9v3h-2v2h6v-2h-2v-3c.5-.5 5-4.75 5-9 0-3.31-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                            </svg>
                         </div>
                     </div>
                     
@@ -200,8 +170,10 @@ $estaLogado = isset($_SESSION['id']);
                         <span class="bg-papel-branco text-azul-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-azul-escuro rounded-xl">
                             TOP SABIDOS
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white text-2xl">
-                            🏆
+                        <div class="w-11 h-11 bg-white/25 border-2 border-azul-escuro rounded-xl flex items-center justify-center text-white">
+                            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
+                            </svg>
                         </div>
                     </div>
                     
@@ -226,27 +198,12 @@ $estaLogado = isset($_SESSION['id']);
 
         </main>
 
-        <!-- RODAPÉ INTERNO -->
-        <footer id="rodape-principal" class="w-full pt-4 mt-6 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm font-bingo font-bold text-gray-700">
-            <div class="flex items-center gap-2">
-                <span class="w-3.5 h-3.5 bg-verde-vibrante border border-tinta-escura rounded-full inline-block"></span>
-                <span>PÁGINA 01 DE ATIVIDADES</span>
-            </div>
-            <div class="bg-papel-claro borda-tinta-escura px-3 py-1.5 rounded-xl text-tinta-escura uppercase font-extrabold shadow-sm font-bingo">
-                PROTÓTIPO V3 - CARDS VIBRANTES & BRANCO VIVO
-            </div>
-        </footer>
-
     </div>
 
     <!-- JAVASCRIPT SIMPLES PARA FEEDBACK INTERATIVO -->
     <script>
         function abrirModulo(modulo) {
-            alert('Atividade Selecionada: ' + modulo + '\nEm breve este card abrirá o desafio correspondente!');
-        }
-
-        function toggleAudio() {
-            alert('Instrução em Áudio:\nClique em uma das 3 opções coloridas na tela para começar seu exercício no livro!');
+            alert('Atividade Selecionada: ' + modulo);
         }
     </script>
 </body>

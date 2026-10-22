@@ -5,7 +5,8 @@
    Schema: tccdb | Tema (id_jogo = 2)
    ============================================================ */
 
-require_once 'config/config.php';
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/proteger.php';
 
 // Busca os temas específicos do jogo dos balões (id_jogo = 2)
 $id_jogo = 2;
@@ -167,24 +168,6 @@ $inclinacoes = [
                 </svg>
                 BACK TO MENU
             </a>
-
-            <!-- Perfil do Aluno -->
-            <div id="perfil-aluno"
-                 class="flex items-center gap-3 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
-                <div class="w-9 h-9 bg-amarelo-vibrante borda-tinta-escura rounded-xl flex items-center justify-center font-bold">
-                    <span class="text-lg">⭐</span>
-                </div>
-                <div>
-                    <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider font-bingo">LEVEL 1</span>
-                    <span class="block font-bingo text-base font-bold text-tinta-escura leading-none">APRENDIZ SABIDO</span>
-                </div>
-            </div>
-
-            <!-- Badge Informativa do Jogo -->
-            <div class="hidden sm:flex items-center gap-2 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca font-bingo font-extrabold text-sm text-azul-escuro">
-                <span>🇬🇧</span>
-                <span>ENGLISH FOR KIDS</span>
-            </div>
         </header>
 
         <!-- ÁREA PRINCIPAL: SELEÇÃO DE TEMAS -->
@@ -253,7 +236,7 @@ $inclinacoes = [
 
             <!-- Mensagem caso não haja nenhum tema cadastrado -->
             <div class="text-center py-12">
-                <p class="text-6xl mb-4">📭</p>
+                
                 <p class="font-bingo font-bold text-2xl text-gray-700">
                     No topics found in the database.<br>
                     Please insert topics in the Tema table!

@@ -5,7 +5,8 @@
    Schema: tccdb | Jogo → Pergunta → Conjunto de respostas erradas
    ============================================================ */
 
-   require_once 'config/config.php';
+   require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/proteger.php';
 
    $id_jogo = 1;
 

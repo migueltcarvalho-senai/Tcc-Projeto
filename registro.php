@@ -16,15 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $senha = $_POST['senha'] ?? '';
     $confirmarSenha = $_POST['confirmar_senha'] ?? '';
 
-    // Validações com linguagem amigável e pedagógica
     if (empty($nome) || empty($senha) || empty($confirmarSenha)) {
-        $erro = 'Por favor, preencha todos os campos do seu cadastro!';
+        $erro = 'Por favor, preencha todos os campos.';
     } elseif (mb_strlen($nome) < 3) {
-        $erro = 'O seu nome deve ter pelo menos 3 letrinhas.';
+        $erro = 'O nome de usuário deve conter pelo menos 3 caracteres.';
     } elseif (strlen($senha) < 4) {
-        $erro = 'A senha precisa ter pelo menos 4 números ou letras.';
+        $erro = 'A senha deve conter pelo menos 4 caracteres.';
     } elseif ($senha !== $confirmarSenha) {
-        $erro = 'As duas senhas digitadas não são iguais! Confira e tente de novo.';
+        $erro = 'As senhas informadas não coincidem. Tente novamente.';
     } else {
         // Verifica se já existe um usuário com o mesmo nome
         $checkSql = "SELECT id FROM usuarios WHERE nome = ? LIMIT 1";
@@ -36,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $checkStmt->store_result();
 
             if ($checkStmt->num_rows > 0) {
-                $erro = 'Esse nome já está em uso por outro aprendiz. Que tal tentar outro?';
+                $erro = 'Esse nome de usuário já está em uso. Por favor, escolha outro.';
             } else {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $pontuacaoInicial = 0;
@@ -53,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         header('Location: login.php?cadastrado=1');
                         exit;
                     } else {
-                        $erro = 'Ops! Não conseguimos salvar seu cadastro agora. Tente de novo.';
+                        $erro = 'Erro ao salvar o cadastro. Tente novamente.';
                     }
                     $insertStmt->close();
                 } else {
@@ -62,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $checkStmt->close();
         } else {
-            $erro = 'Erro ao consultar o banco de dados.';
+            $erro = 'Erro interno ao consultar o banco de dados.';
         }
     }
 }
@@ -126,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <!-- FOLHA DO LIVRO / CADERNO ESCOLAR -->
-    <main id="livro-conteiner-principal" class="w-full max-w-xl caderno-pagina-branca p-5 sm:p-8 md:p-10 my-6">
+    <main id="livro-conteiner-principal" class="w-full max-w-xl caderno-pagina-branca p-6 sm:p-8 md:p-10 my-6">
 
         <!-- ESPIRAL DO CADERNO NO TOPO -->
         <div id="espiral-topo-caderno" class="w-full flex justify-between items-center -mt-9 sm:-mt-12 mb-6 z-20 px-2 sm:px-6" aria-hidden="true">
@@ -142,18 +141,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="espiral-caderno hidden md:block"></div>
         </div>
 
-        <!-- BARRA SUPERIOR COM BOTÃO VOLTAR -->
-        <div class="flex items-center justify-between w-full mb-6 pb-3 border-b-2 border-dashed border-gray-300">
-            <a href="index.php" class="botao-cartum botao-branco px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold flex items-center gap-1.5">
-                <span>← VOLTAR AO INÍCIO</span>
-            </a>
-            <div class="flex items-center gap-1.5 bg-verde-vibrante border-2 border-tinta-escura rounded-lg px-3 py-1 shadow-[0px_3px_0px_#0F172A] transform -rotate-1 text-white">
-                <span class="text-xs sm:text-sm font-black uppercase">✏️ NOVO APRENDIZ</span>
-            </div>
-        </div>
-
         <!-- CABEÇALHO COM TÍTULO VIBRANTE E LETRAS ENTORTADAS -->
-        <div class="text-center mb-7">
+        <div class="text-center mb-8">
             <h1 class="font-gooddog text-5xl sm:text-6xl md:text-7xl font-bold tracking-wider leading-none select-none my-1">
                 <span class="letra-vibrante text-verde-vibrante" style="transform: rotate(-6deg);">C</span>
                 <span class="letra-vibrante text-laranja-vibrante" style="transform: rotate(5deg);">A</span>
@@ -166,14 +155,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="letra-vibrante text-amarelo-vibrante" style="transform: rotate(-6deg);">!</span>
             </h1>
             <p class="font-bingo text-lg sm:text-xl font-bold text-gray-700 tracking-wide mt-2">
-                Escreva seu nome no caderno para salvar suas medalhas e pontos!
+                Preencha os campos abaixo para criar sua conta
             </p>
         </div>
 
         <!-- ALERTA DE ERRO -->
         <?php if (!empty($erro)): ?>
-            <div class="alerta-ludico alerta-erro p-3.5 mb-6 flex items-center gap-2.5">
-                <span class="text-2xl">⚠️</span>
+            <div class="alerta-ludico alerta-erro p-3.5 mb-6 text-center">
                 <span class="font-bingo text-base sm:text-lg font-bold"><?= htmlspecialchars($erro) ?></span>
             </div>
         <?php endif; ?>
@@ -184,14 +172,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="campo-wrapper campo-inclinado-1">
                 <label for="nome" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
                     <span class="inline-block w-3.5 h-3.5 bg-verde-vibrante border-2 border-tinta-escura rounded-sm"></span>
-                    QUAL É O SEU NOME?
+                    NOME DE USUÁRIO:
                 </label>
                 <input 
                     type="text" 
                     id="nome" 
                     name="nome" 
                     class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
-                    placeholder="Ex: Maria Clara" 
+                    placeholder="Digite seu nome de usuário" 
                     value="<?= htmlspecialchars($nome) ?>" 
                     required 
                     autofocus
@@ -203,14 +191,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="campo-wrapper campo-inclinado-2">
                 <label for="senha" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
                     <span class="inline-block w-3.5 h-3.5 bg-laranja-vibrante border-2 border-tinta-escura rounded-sm"></span>
-                    CRIE UMA SENHA SECRETA:
+                    SENHA:
                 </label>
                 <input 
                     type="password" 
                     id="senha" 
                     name="senha" 
                     class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
-                    placeholder="Pelo menos 4 caracteres" 
+                    placeholder="Mínimo de 4 caracteres" 
                     required
                     autocomplete="new-password"
                 >
@@ -220,14 +208,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="campo-wrapper campo-inclinado-3">
                 <label for="confirmar_senha" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
                     <span class="inline-block w-3.5 h-3.5 bg-azul-vibrante border-2 border-tinta-escura rounded-sm"></span>
-                    CONFIRME SUA SENHA:
+                    CONFIRMAR SENHA:
                 </label>
                 <input 
                     type="password" 
                     id="confirmar_senha" 
                     name="confirmar_senha" 
                     class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
-                    placeholder="Repita a senha aqui" 
+                    placeholder="Repita sua senha" 
                     required
                     autocomplete="new-password"
                 >
@@ -235,8 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- BOTÃO DE CADASTRO -->
             <div class="pt-2">
-                <button type="submit" class="botao-cartum botao-laranja w-full py-3.5 sm:py-4 text-2xl sm:text-3xl font-gooddog font-bold tracking-wider flex items-center justify-center gap-3">
-                    <span>CRIAR MINHA CONTA 🎉</span>
+                <button type="submit" class="botao-cartum botao-laranja w-full py-3.5 sm:py-4 text-2xl sm:text-3xl font-gooddog font-bold tracking-wider flex items-center justify-center">
+                    <span>CRIAR CONTA</span>
                 </button>
             </div>
         </form>
@@ -244,10 +232,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- RODAPÉ DO CADERNO / LINK PARA LOGIN -->
         <div class="mt-8 pt-5 border-t-2 border-dashed border-gray-300 text-center">
             <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 mb-2.5">
-                Já tem seu nome anotado aqui?
+                Já possui uma conta?
             </p>
-            <a href="login.php" class="botao-cartum botao-verde inline-block px-5 py-2.5 text-base sm:text-lg font-bold">
-                FAZER LOGIN NO LIVRO 🔑
+            <a href="login.php" class="botao-cartum botao-verde inline-block px-6 py-2.5 text-base sm:text-lg font-bold">
+                FAZER LOGIN
             </a>
         </div>
     </main>
