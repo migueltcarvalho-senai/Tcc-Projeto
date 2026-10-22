@@ -1,3 +1,10 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$nomeUsuario = $_SESSION['user'] ?? 'Aprendiz Sabido';
+$estaLogado = isset($_SESSION['id']);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -91,12 +98,21 @@
                 </div>
                 <div>
                     <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider font-bingo">NÍVEL 1</span>
-                    <span class="block font-bingo text-base font-bold text-tinta-escura leading-none">APRENDIZ SABIDO</span>
+                    <span class="block font-bingo text-base font-bold text-tinta-escura leading-none"><?= htmlspecialchars(mb_strtoupper($nomeUsuario)) ?></span>
                 </div>
             </div>
 
             <!-- Controle de Áudio -->
             <div id="controle-audio" class="flex items-center gap-2">
+                <?php if ($estaLogado): ?>
+                    <a href="logout.php" title="Sair da conta" class="cartao-dinamico bg-red-500 hover:bg-red-600 text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-1 transition">
+                        <span>SAIR</span>
+                    </a>
+                <?php else: ?>
+                    <a href="login.php" title="Entrar na conta" class="cartao-dinamico bg-verde-vibrante hover:opacity-90 text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-1 transition">
+                        <span>ENTRAR</span>
+                    </a>
+                <?php endif; ?>
                 <button id="botao-ouvir-tela" onclick="toggleAudio()" class="cartao-dinamico bg-azul-vibrante text-white borda-tinta-escura rounded-2xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca flex items-center gap-2">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
