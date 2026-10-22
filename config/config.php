@@ -1,8 +1,8 @@
 <?php
 $db   = "tccdb";
 $host = "localhost";
-$port = "3308";
-$pass = "";
+$port = "3306";
+$pass = "mysql";
 $user = "root";
 
 $conn = new mysqli($host, $user, $pass, $db, $port);

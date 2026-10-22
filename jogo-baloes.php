@@ -130,6 +130,25 @@ $total_frases = count($frases_jogo);
 
 /* Serializar para o JavaScript de forma segura */
 $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+
+// Carrega dinamicamente os balões de cores disponíveis na pasta baloes/cores
+$baloes_cores_arquivos = glob('baloes/cores/*.gif');
+$baloes_cores = [];
+if (!empty($baloes_cores_arquivos)) {
+    foreach ($baloes_cores_arquivos as $arq) {
+        $baloes_cores[] = str_replace('\\', '/', $arq);
+    }
+}
+if (empty($baloes_cores)) {
+    $baloes_cores = [
+        'baloes/cores/balao-amarelo.gif',
+        'baloes/cores/balao-laranja.gif',
+        'baloes/cores/balao-rosa.gif',
+        'baloes/cores/balao-verde.gif',
+        'baloes/cores/balao-vermelho.gif',
+    ];
+}
+$baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -321,6 +340,9 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
                     <span class="frase-construcao-label">Sentence Builder</span>
                     <!-- Preenchido pelo JavaScript com os slots de palavras -->
                 </div>
+
+                <!-- ÁREA PARA EXIBIR A FRASE CERTA ABAIXO DA ERRADA EM CASO DE ERRO -->
+                <div id="box-frase-correta" class="w-full flex justify-center"></div>
             </div>
 
             <!-- FEEDBACK INLINE -->
@@ -426,6 +448,7 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
         // 2. Elementos da Interface
         const areaBaloes        = document.getElementById('area-baloes');
         const fraseConstrucao   = document.getElementById('frase-construcao');
+        const boxFraseCorreta   = document.getElementById('box-frase-correta');
         const areaFeedback      = document.getElementById('area-feedback');
         const textoPlacar       = document.getElementById('texto-placar');
         const labelProgresso    = document.getElementById('label-progresso');
@@ -441,22 +464,12 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
         let palavrasSelecionadas = []; // palavras na ordem em que o usuário clicou
         let estaValidando = false;
 
-        // 4. Frames dos Balões Verdes
-        // Inteiro: 37 frames (00 a 36)
-        const FRAMES_INTEIRO = [];
-        for (let i = 0; i <= 36; i++) {
-            const num = String(i).padStart(2, '0');
-            FRAMES_INTEIRO.push(`baloes/verde/inteiro/frame_${num}_delay-0.06s.gif`);
-        }
+        // 4. Balões Coloridos e Animação de Explosão (Pop)
+        const GIF_POP = 'baloes/pop.gif';
+        const baloesCoresDisponiveis = <?= $baloes_cores_json ?>;
 
-        // Exploding: 9 frames (37 a 45)
-        const FRAMES_EXPLODING = [];
-        for (let i = 37; i <= 45; i++) {
-            FRAMES_EXPLODING.push(`baloes/verde/Exploding/frame_${i}_delay-0.06s.gif`);
-        }
-
-        // Pré-carregamento dos frames de explosão para resposta instantânea ao clique
-        FRAMES_EXPLODING.forEach(src => {
+        // Pré-carregamento dos GIFs das cores e do pop.gif para resposta instantânea ao clique
+        [GIF_POP, ...baloesCoresDisponiveis].forEach(src => {
             const img = new Image();
             img.src = src;
         });
@@ -486,6 +499,7 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
             estaValidando = false;
             palavrasSelecionadas = [];
             areaFeedback.innerHTML = '';
+            if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
             atualizarProgresso();
 
             const fraseObj = frasesData[indice];
@@ -615,12 +629,22 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
                 [slotsSorteados[i], slotsSorteados[j]] = [slotsSorteados[j], slotsSorteados[i]];
             }
 
+            // Redistribuição randômica das cores dos balões (embaralha a paleta de cores para cada rodada)
+            const coresEmbaralhadas = [...baloesCoresDisponiveis];
+            for (let i = coresEmbaralhadas.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [coresEmbaralhadas[i], coresEmbaralhadas[j]] = [coresEmbaralhadas[j], coresEmbaralhadas[i]];
+            }
+
             listaPalavras.forEach((item, index) => {
                 const balao = document.createElement('div');
                 const animacaoClasse = `balao-flutuar-${(index % 3) + 1}`;
                 balao.className = `balao-container ${animacaoClasse}`;
                 balao.dataset.palavra = item.texto;
                 balao.dataset.id = item.id;
+
+                // Atribui uma cor da paleta embaralhada garantindo diversidade visual entre os balões
+                const corEscolhida = coresEmbaralhadas[index % coresEmbaralhadas.length];
 
                 // Posição com margem garantida
                 const slot = slotsSorteados[index % slotsSorteados.length];
@@ -638,10 +662,9 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
                 balao.style.animationDelay = `${delayFlutuar}s`;
                 balao.style.transform = `rotate(${rotacaoInicial}deg)`;
 
-                // Imagem ampliada do balão verde oscilante
+                // Imagem do balão colorido em GIF (o arquivo GIF já possui animação de oscilação contínua)
                 const img = document.createElement('img');
-                const frameInicialIdx = Math.floor(Math.random() * FRAMES_INTEIRO.length);
-                img.src = FRAMES_INTEIRO[frameInicialIdx];
+                img.src = corEscolhida;
                 img.className = 'balao-img';
                 img.alt = `Balloon with word ${item.texto}`;
                 img.draggable = false;
@@ -664,30 +687,18 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
                 balao.appendChild(img);
                 balao.appendChild(spanPalavra);
 
-                // Ciclo suave de animação dos frames do balão flutuando
-                let frameIdx = frameInicialIdx;
-                const intervaloFlutuar = setInterval(() => {
-                    if (balao.classList.contains('balao-explodindo') || !document.body.contains(balao)) {
-                        clearInterval(intervaloFlutuar);
-                        return;
-                    }
-                    frameIdx = (frameIdx + 1) % FRAMES_INTEIRO.length;
-                    img.src = FRAMES_INTEIRO[frameIdx];
-                }, 75);
-
                 // Evento de clique para estourar o balão
                 balao.addEventListener('click', () => {
                     if (estaValidando || balao.classList.contains('balao-explodindo')) return;
-                    estourarBalao(balao, img, spanPalavra, item.texto, intervaloFlutuar);
+                    estourarBalao(balao, img, spanPalavra, item.texto);
                 });
 
                 areaBaloes.appendChild(balao);
             });
         }
 
-        // 9. Ação de Estourar o Balão (Pop)
-        function estourarBalao(balao, img, spanPalavra, palavra, intervaloFlutuar) {
-            clearInterval(intervaloFlutuar);
+        // 9. Ação de Estourar o Balão (Pop com pop.gif)
+        function estourarBalao(balao, img, spanPalavra, palavra) {
             balao.classList.add('balao-explodindo');
 
             // Esconde o texto da palavra imediatamente para evidenciar a explosão
@@ -698,25 +709,21 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
             palavrasSelecionadas.push(palavra);
             preencherSlot(slotIdx, palavra);
 
-            // Animação da explosão frame a frame dos GIFs de Exploding
-            let explodingIdx = 0;
-            const intervaloExplosao = setInterval(() => {
-                if (explodingIdx < FRAMES_EXPLODING.length) {
-                    img.src = FRAMES_EXPLODING[explodingIdx];
-                    explodingIdx++;
-                } else {
-                    clearInterval(intervaloExplosao);
-                    balao.classList.add('balao-sumindo');
-                    setTimeout(() => {
-                        if (balao.parentNode) {
-                            balao.parentNode.removeChild(balao);
-                        }
-                    }, 300);
+            // Troca para o GIF de explosão com timestamp para forçar reinício da animação a partir do frame 0
+            img.src = `${GIF_POP}?t=${Date.now()}`;
 
-                    // Verifica se todas as palavras foram selecionadas
-                    verificarConclusaoRodada();
-                }
-            }, 60);
+            // Aguarda o ciclo de 9 frames do pop.gif (~500ms) para sumir suavemente
+            setTimeout(() => {
+                balao.classList.add('balao-sumindo');
+                setTimeout(() => {
+                    if (balao.parentNode) {
+                        balao.parentNode.removeChild(balao);
+                    }
+                }, 250);
+
+                // Verifica se todas as palavras foram selecionadas
+                verificarConclusaoRodada();
+            }, 500);
         }
 
         // 10. Preencher Slot na Frase em Construção
@@ -746,6 +753,7 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
             if (fraseMontada === fraseEsperada) {
                 // ACERTOU!
                 acertos++;
+                if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
                 areaFeedback.innerHTML = `
                     <span class="feedback-acerto flex items-center justify-center gap-2">
                         <span>⭐ EXCELLENT! YOU BUILT THE SENTENCE! ⭐</span>
@@ -771,20 +779,59 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
                 }, 1400);
 
             } else {
-                // ERROU! Reorganiza as palavras novamente
+                // ERROU! Destaca os slots da frase errada em vermelho
+                for (let i = 0; i < totalPalavras; i++) {
+                    const slot = document.getElementById(`slot-${i}`);
+                    if (slot) {
+                        slot.classList.add('palavra-slot-erro');
+                    }
+                }
+
+                // Exibe a frase certa abaixo da frase errada
+                if (boxFraseCorreta) {
+                    boxFraseCorreta.innerHTML = `
+                        <div class="card-correcao w-full max-w-xl text-center">
+                            <span class="card-correcao-tag">
+                                <span>💡 CORRECT SENTENCE:</span>
+                            </span>
+                            <div class="card-correcao-frase">
+                                "${fraseObj.frase_controle}"
+                            </div>
+                            <button type="button" id="btn-tentar-agora" class="mt-2 bg-verde-vibrante text-white text-xs font-bingo font-extrabold px-3.5 py-1.5 rounded-xl border-2 border-tinta-escura shadow-sm hover:scale-105 transition-transform flex items-center gap-1.5 cursor-pointer">
+                                <span>TRY AGAIN NOW</span>
+                                <span>🔄</span>
+                            </button>
+                        </div>
+                    `;
+                }
+
                 areaFeedback.innerHTML = `
                     <span class="feedback-erro flex items-center justify-center gap-2">
-                        <span>❌ OOPS! TRY AGAIN IN THE RIGHT ORDER! 🔄</span>
+                        <span>❌ OOPS! TAKE A LOOK AT THE CORRECT SENTENCE! 🔄</span>
                     </span>
                 `;
 
-                // Balança a frase em construção
+                // Efeito visual de tremor na frase errada
                 fraseConstrucao.classList.add('animate-bounce');
 
-                setTimeout(() => {
+                let resetTimer = null;
+                const executarReset = () => {
+                    if (resetTimer) {
+                        clearTimeout(resetTimer);
+                        resetTimer = null;
+                    }
                     fraseConstrucao.classList.remove('animate-bounce');
+                    if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
                     reiniciarFraseAtual();
-                }, 1600);
+                };
+
+                const btnTentar = document.getElementById('btn-tentar-agora');
+                if (btnTentar) {
+                    btnTentar.addEventListener('click', executarReset);
+                }
+
+                // Dá 3.8s para a criança ler a frase certa confortavelmente antes de reiniciar
+                resetTimer = setTimeout(executarReset, 3800);
             }
         }
 
@@ -793,6 +840,7 @@ $frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG |
             palavrasSelecionadas = [];
             estaValidando = false;
             areaFeedback.innerHTML = '';
+            if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
             const fraseObj = frasesData[indiceFraseAtual];
             renderizarSlots(fraseObj.palavras.length);
             renderizarBaloes(fraseObj.palavras);

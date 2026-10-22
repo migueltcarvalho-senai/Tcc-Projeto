@@ -331,6 +331,53 @@ body {
     animation: palavra-entrar 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* Slot com erro */
+.palavra-slot-erro {
+    border-color: #FF1744 !important;
+    background-color: #FFEBEE !important;
+    color: #B71C1C !important;
+    box-shadow: 0 3px 0 #B71C1C !important;
+    animation: feedback-erro 0.5s ease-out;
+}
+
+/* Card da Frase Correta exibido abaixo da frase errada */
+.card-correcao {
+    background: #F0FDF4;
+    border: 3px solid #054D20;
+    border-radius: 18px;
+    box-shadow: 0 5px 0 #054D20;
+    padding: 12px 20px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    animation: palavra-entrar 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.card-correcao-tag {
+    font-family: 'Bingo', cursive, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #054D20;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-correcao-frase {
+    font-family: 'Gooddog', cursive, sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #00C853;
+    text-shadow: 0 1px 0 #054D20;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-align: center;
+}
+
 /* ============================================================
    BARRA DE PROGRESSO
    ============================================================ */

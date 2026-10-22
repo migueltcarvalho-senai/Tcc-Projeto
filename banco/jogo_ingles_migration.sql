@@ -137,10 +137,10 @@ ON DUPLICATE KEY UPDATE `nome` = VALUES(`nome`);
 -- Dados: Temas do Jogo 2
 -- --------------------------------------------------------
 INSERT INTO `Tema` (`id`, `id_jogo`, `nome`) VALUES
-(7, 2, 'daily life'),
-(8, 2, 'nature'),
-(9, 2, 'animals'),
-(10, 2, 'food')
+(7, 2 'animals'),
+(8, 2, 'sports'),
+(9, 2, 'school'),
+(10, 2, 'family')
 ON DUPLICATE KEY UPDATE `nome` = VALUES(`nome`);
 
 -- --------------------------------------------------------
@@ -158,30 +158,94 @@ CREATE TABLE IF NOT EXISTS `Frases` (
 -- --------------------------------------------------------
 -- Dados: Frases de Exemplo (Jogo 2)
 -- --------------------------------------------------------
-INSERT INTO `Frases` (`frase`, `id_tema`) VALUES
--- daily life (id_tema=7)
-('The cat is sleeping', 7),
-('I go to school', 7),
-('She reads a book', 7),
-('We play every day', 7),
-('He drinks cold water', 7),
--- nature (id_tema=8)
-('The sun is bright', 8),
-('Birds fly very high', 8),
-('Flowers grow in spring', 8),
-('The river is cold', 8),
-('Trees have green leaves', 8),
--- animals (id_tema=9)
-('The dog runs fast', 9),
-('Cats like warm milk', 9),
-('Fish swim in water', 9),
-('The rabbit eats carrots', 9),
-('Birds sing every morning', 9),
--- food (id_tema=10)
-('I like red apples', 10),
-('She eats hot soup', 10),
-('We drink orange juice', 10),
-('He wants more cake', 10),
-('Rice and beans please', 10);
+-- Tema: Animals (ID 7)
+INSERT INTO `Frases` (`frase`, `id_tema`) VALUES  
+('The tiger is a very strong animal', 7),
+('The panda is eating green bamboo', 7),
+('The turtle walks very slowly', 7),
+('The spider has eight long legs', 7),
+('The penguin lives in the cold ice', 7),
+('The bear is sleeping in the dark cave', 7),
+('The horse is running on the big farm', 7),
+('The snake is green and long', 7),
+('The dolphin is swimming in the blue ocean', 7),
+('The butterfly has beautiful colorful wings', 7),
+('The capybara is chilling like a boss', 7),
+('The little dog is doing a funny TikTok dance', 7),
+('The cat is hiding inside the cardboard box', 7),
+('The pink pig loves to play in the mud', 7),
+('The zebra has black and white stripes', 7),
+('The kangaroo is jumping very high', 7),
+('The wise owl is looking at the night sky', 7),
+('The little mouse is eating yellow cheese', 7),
+('The bee is making sweet honey', 7),
+('The shark is the big monster of the sea', 7);
 
+-- Tema: Sports (ID 8)
+INSERT INTO `Frases` (`frase`, `id_tema`) VALUES  
+('The boy is playing soccer in the green field', 8),
+('The tall player is playing basketball like an NBA star', 8),
+('The girl is swimming very fast in the blue pool', 8),
+('The runner is using cool sneakers to win the race', 8),
+('The volleyball match is very famous on Instagram', 8),
+('The yellow tennis ball is flying over the big net', 8),
+('The cool boy is doing a skateboard trick for TikTok', 8),
+('The gamer is playing an e-sports tournament on his computer', 8),
+('The champion is happy with the shiny gold medal', 8),
+('The surfer is riding a giant wave at the beautiful beach', 8),
+('The famous soccer player is scoring a beautiful goal', 8),
+('The kids are playing ping pong on the big table', 8),
+('The karate master is breaking the wood with a fast kick', 8),
+('The strong man is lifting heavy weights in the gym', 8),
+('The gymnastics girl is jumping very high in the air', 8),
+('The bicycle is super fast in the amazing street race', 8),
+('The baseball player is hitting the ball with a big bat', 8),
+('The snowboarder is sliding down the cold snow mountain', 8),
+('The happy fans are making a viral video in the big stadium', 8),
+('The boxing champion is training hard for the great fight', 8);
 
+-- Tema: School (ID 9)
+INSERT INTO `Frases` (`frase`, `id_tema`) VALUES  
+('The yellow pencil is inside the case', 9),
+('The open book is on the student desk', 9),
+('The teacher is writing on the blackboard', 9),
+('The heavy backpack is full of notebooks', 9),
+('The kids are playing soccer during the break', 9),
+('The yellow school bus is waiting outside', 9),
+('The blue pen is next to the white eraser', 9),
+('The students are using the computer in the lab', 9),
+('The physical education class is very fun', 9),
+('The girl is drawing a beautiful picture in art class', 9),
+('The friends are making a TikTok dance at school', 9),
+('The math test is easy like a video game', 9),
+('The school bell is ringing for the recess', 9),
+('The smart boy is doing his English homework', 9),
+('The children are eating pizza in the cafeteria', 9),
+('The scissors are for cutting the colorful paper', 9),
+('The principal is talking in the big microphone', 9),
+('The science project is a cool volcano', 9),
+('The dictionary is helping me learn new words', 9),
+('The music class is my favorite part of the day', 9);
+
+-- Tema: Family (ID 10)
+INSERT INTO `Frases` (`frase`, `id_tema`) VALUES  
+('The loving mother is cooking a delicious pizza', 10),
+('The cool father is playing a racing video game', 10),
+('My big brother is watching a funny video on TikTok', 10),
+('The little sister is drawing a colorful rainbow', 10),
+('The sweet grandmother is making a big chocolate cake', 10),
+('The old grandfather is sleeping on the comfortable sofa', 10),
+('The happy family is taking a beautiful photo for Instagram', 10),
+('My funny uncle is dancing at the birthday party', 10),
+('The young aunt is buying a new toy at the mall', 10),
+('My baby cousin is playing with the cute dog', 10),
+('The father is driving the big blue car', 10),
+('The mother is helping me with my English homework', 10),
+('My sister is listening to pop music on her phone', 10),
+('The brother is playing soccer in the green park', 10),
+('The grandfather is telling an amazing old story', 10),
+('The grandmother loves her beautiful flower garden', 10),
+('My cousin is wearing a cool superhero t-shirt', 10),
+('The whole family is watching a fun movie together', 10),
+('My parents are buying sweet ice cream for us', 10),
+('The twin brothers are doing a crazy viral dance', 10);
