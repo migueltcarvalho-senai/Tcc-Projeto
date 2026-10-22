@@ -6,7 +6,7 @@
 /* Fonte Personalizada Gooddog */
 @font-face {
     font-family: 'Gooddog';
-    src: url('../fonts/good_dog/gooddog.TTF') format('truetype');
+    src: url('../fonts/good_dog/gooddog.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -20,7 +20,7 @@
 /* Fonte Personalizada Bingo (Textos Secundários) */
 @font-face {
     font-family: 'Bingo';
-    src: url('../fonts/bingo/BINGO.ttf') format('truetype');
+    src: url('../fonts/bingo/bingo.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;

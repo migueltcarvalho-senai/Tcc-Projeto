@@ -1,6 +1,6 @@
 <?php
 /* ============================================================
-   jogo-ingles.php — Complete the Sentence! (Gap Fill Quiz)
+   jogo_ingles.php — Complete the Sentence! (Gap Fill Quiz)
    English for Kids — Fundamental 1
    Schema: tccdb | Jogo → Pergunta → Conjunto de respostas erradas
    ============================================================ */
@@ -92,15 +92,15 @@
 // Randomiza a ordem das perguntas a cada carregamento da página
 shuffle($perguntas);
 
-// Lista de fundos disponíveis para a lacuna (cores sortidas da pasta fundo-resposta-completar)
+// Lista de fundos disponíveis para a lacuna (cores sortidas da pasta fundo_resposta_completar)
 $fundos_disponiveis = [
-    'fundo-resposta-completar/1.png',
-    'fundo-resposta-completar/2.png',
-    'fundo-resposta-completar/3.png',
-    'fundo-resposta-completar/4.png',
-    'fundo-resposta-completar/5.png',
-    'fundo-resposta-completar/6.png',
-    'fundo-resposta-completar/7.png',
+    'fundo_resposta_completar/1.png',
+    'fundo_resposta_completar/2.png',
+    'fundo_resposta_completar/3.png',
+    'fundo_resposta_completar/4.png',
+    'fundo_resposta_completar/5.png',
+    'fundo_resposta_completar/6.png',
+    'fundo_resposta_completar/7.png',
 ];
 
 // Atribui um fundo randomizado para cada pergunta, garantindo cores sortidas e alternadas entre frases
@@ -171,7 +171,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
     </script>
 
     <!-- CSS do jogo -->
-    <link rel="stylesheet" href="css/jogo-ingles.css">
+    <link rel="stylesheet" href="css/jogo_ingles.css">
 </head>
 <body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
 
@@ -209,7 +209,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 class="w-full flex flex-wrap items-center justify-between gap-4 pb-4 mb-4">
 
             <!-- Botão Voltar para Seleção de Temas -->
-            <a href="temas-ingles.php"
+            <a href="temas_ingles.php"
                class="cartao-dinamico flex items-center gap-2 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca font-bingo font-bold text-sm text-tinta-escura hover:bg-yellow-100 transition-colors"
                style="text-decoration: none;">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -264,7 +264,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
             <div id="seletor-temas" class="flex flex-wrap items-center justify-center gap-2 -mt-2">
                 <span class="font-bingo font-black text-xs text-gray-500 uppercase tracking-widest mr-1">TOPICS:</span>
                 <?php foreach ($temas_disponiveis as $t): ?>
-                    <a href="jogo-ingles.php?tema=<?= urlencode($t['id']) ?>"
+                    <a href="jogo_ingles.php?tema=<?= urlencode($t['id']) ?>"
                        class="cartao-dinamico px-3.5 py-1.5 rounded-xl font-bingo font-bold text-xs border-2 border-tinta-escura transition-all <?= ($tema_ativo && $tema_ativo['id'] === $t['id']) ? 'bg-amarelo-vibrante text-tinta-escura shadow-sombra-cartum-branca scale-105' : 'bg-papel-claro text-gray-600 hover:bg-white' ?>"
                        style="text-decoration: none;">
                         <?= htmlspecialchars(ucfirst($t['nome'])) ?> (<?= $t['total_perguntas'] ?>)
@@ -296,7 +296,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                     <span id="conteiner-lacuna" class="conteiner-lacuna">
                         <img id="fundo-lacuna-img"
                              class="fundo-lacuna-img"
-                             src="<?= htmlspecialchars($perguntas[0]['fundo_lacuna'] ?? 'fundo-resposta-completar/1.png') ?>"
+                             src="<?= htmlspecialchars($perguntas[0]['fundo_lacuna'] ?? 'fundo_resposta_completar/1.png') ?>"
                              alt="Fundo colorido da lacuna"
                              aria-hidden="true"
                              draggable="false">
@@ -328,7 +328,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                     No questions found.<br>
                     Add questions to the database first!
                 </p>
-                <a href="temas-ingles.php"
+                <a href="temas_ingles.php"
                    class="botao-acao mt-6 bg-azul-vibrante text-white inline-flex"
                    style="text-decoration:none;">
                     ← Back to Topics
@@ -378,7 +378,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                         class="botao-acao bg-verde-vibrante text-white">
                     🔄 Play Again
                 </button>
-                <a href="temas-ingles.php"
+                <a href="temas_ingles.php"
                    class="botao-acao bg-amarelo-vibrante text-tinta-escura"
                    style="text-decoration: none;">
                     📌 Other Topics
@@ -432,13 +432,13 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
 
     /* Pré-carregamento dos 7 fundos para evitar atrasos na troca */
     const LISTA_FUNDOS = [
-        'fundo-resposta-completar/1.png',
-        'fundo-resposta-completar/2.png',
-        'fundo-resposta-completar/3.png',
-        'fundo-resposta-completar/4.png',
-        'fundo-resposta-completar/5.png',
-        'fundo-resposta-completar/6.png',
-        'fundo-resposta-completar/7.png'
+        'fundo_resposta_completar/1.png',
+        'fundo_resposta_completar/2.png',
+        'fundo_resposta_completar/3.png',
+        'fundo_resposta_completar/4.png',
+        'fundo_resposta_completar/5.png',
+        'fundo_resposta_completar/6.png',
+        'fundo_resposta_completar/7.png'
     ];
     LISTA_FUNDOS.forEach(src => {
         const img = new Image();

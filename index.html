@@ -119,11 +119,11 @@
                 </p>
             </div>
 
-            <!-- GRADE DE CARDS (TÍTULOS DOS CARDS COM FONTE GOODDOG) -->
-            <div id="grade-atividades" class="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2 py-4">
+            <!-- GRADE DE CARDS (3 CARDS: 2 JOGOS + RANKING) -->
+            <div id="grade-atividades" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 px-2 py-4">
                 
                 <!-- CARD 1: JOGO DE INGLÊS -->
-                <a id="card-ingles" href="temas-ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-ingles" href="temas_ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-verde-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
                             JOGO 01
@@ -151,7 +151,7 @@
                 </a>
 
                 <!-- CARD 2: JOGO DOS BALÕES -->
-                <a id="card-baloes" href="temas-baloes.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-baloes" href="temas_baloes.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-laranja-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
                             JOGO 02
@@ -178,60 +178,28 @@
                     </div>
                 </a>
 
-                <!-- CARD 3: ARTE / QUADRO -->
-                <div id="card-desenho" onclick="abrirModulo('Desenho e Arte')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-6 shadow-sombra-cartum-azul flex flex-col justify-between min-h-[250px] cursor-pointer group">
+                <!-- CARD 3: RANKING -->
+                <div id="card-ranking" onclick="abrirModulo('Ranking')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-6 shadow-sombra-cartum-azul flex flex-col justify-between min-h-[250px] cursor-pointer group">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-azul-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-azul-escuro rounded-xl">
-                            CRIATIVIDADE
+                            TOP SABIDOS
                         </span>
-                        <div class="w-11 h-11 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white">
-                            <svg class="w-7 h-7 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4c0-2.21 3.58-9 7-13 3.42 4 7 10.79 7 13a4 4 0 01-4 4M7 21h10"/>
-                            </svg>
+                        <div class="w-11 h-11 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white text-2xl">
+                            🏆
                         </div>
                     </div>
                     
                     <div class="my-4">
                         <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-white tracking-wider">
-                            QUADRO DE DESENHO
+                            RANKING
                         </h3>
                         <p class="font-bingo text-sm font-extrabold text-blue-100 mt-1 tracking-wide">
-                            Pinte e crie suas formas
+                            Veja os melhores pontuadores!
                         </p>
                     </div>
 
                     <div class="w-full bg-papel-branco text-azul-escuro font-bingo font-extrabold text-base py-3 px-4 border-2 border-azul-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
-                        <span>ABRIR QUADRO</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- CARD 4: MINHAS MEDALHAS -->
-                <div id="card-medalhas" onclick="abrirModulo('Minhas Medalhas')" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-leve-direita bg-amarelo-vibrante text-tinta-escura cartao-borda-amarela cartao-arredondado p-6 shadow-sombra-cartum-amarela flex flex-col justify-between min-h-[250px] cursor-pointer group">
-                    <div class="flex items-center justify-between">
-                        <span class="bg-papel-branco text-amarelo-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-amarelo-escuro rounded-xl">
-                            PRÊMIOS
-                        </span>
-                        <div class="w-11 h-11 bg-black/10 border-2 border-amarelo-escuro rounded-2xl flex items-center justify-center text-tinta-escura">
-                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
-                                <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 003.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    
-                    <div class="my-4">
-                        <h3 class="font-gooddog text-3xl sm:text-4xl font-bold leading-tight uppercase text-tinta-escura tracking-wider">
-                            MINHAS MEDALHAS
-                        </h3>
-                        <p class="font-bingo text-sm font-extrabold text-yellow-900 mt-1 tracking-wide">
-                            Veja suas conquistas
-                        </p>
-                    </div>
-
-                    <div class="w-full bg-amarelo-escuro text-white font-bingo font-extrabold text-base py-3 px-4 rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-verde-vibrante transition-colors">
-                        <span>VER MEDALHAS</span>
+                        <span>VER RANKING</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
@@ -262,7 +230,7 @@
         }
 
         function toggleAudio() {
-            alert('Instrução em Áudio:\nClique em uma das 4 opções coloridas na tela para começar seu exercício no livro!');
+            alert('Instrução em Áudio:\nClique em uma das 3 opções coloridas na tela para começar seu exercício no livro!');
         }
     </script>
 </body>

@@ -6,7 +6,7 @@
 /* Fonte Personalizada Cute Dolphin (Títulos dos Post-its) */
 @font-face {
     font-family: 'Cute Dolphin';
-    src: url('../fonts/cute_dolphin/Cute Dolphin.ttf') format('truetype');
+    src: url('../fonts/cute_dolphin/cute_dolphin.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -19,7 +19,7 @@
 /* Fonte Personalizada Gooddog (Títulos Principais) */
 @font-face {
     font-family: 'Gooddog';
-    src: url('../fonts/good_dog/gooddog.TTF') format('truetype');
+    src: url('../fonts/good_dog/gooddog.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -33,7 +33,7 @@
 /* Fonte Personalizada Bingo (Textos e Badges) */
 @font-face {
     font-family: 'Bingo';
-    src: url('../fonts/bingo/BINGO.ttf') format('truetype');
+    src: url('../fonts/bingo/bingo.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;

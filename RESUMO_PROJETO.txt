@@ -2,7 +2,7 @@
           HISTÓRICO E RESUMO DE DESENVOLVIMENTO - PROJETO TCC
          SKETCHBOOK EDUCACIONAL INTERATIVO (ENSINO FUNDAMENTAL 1)
 ================================================================================
-Data de Atualização: 21/10/2026
+Data de Atualização: 22/10/2026
 Ambiente de Execução: Laragon (Apache, PHP 8.x, MySQL 8.x / porta 3308)
 Público-Alvo: Crianças de 6 a 9 anos (Ensino Fundamental 1)
 Foco Pedagógico Atual: Língua Inglesa (English for Kids)
@@ -52,30 +52,55 @@ Foco Pedagógico Atual: Língua Inglesa (English for Kids)
 --------------------------------------------------------------------------------
 3. ANIMAÇÕES E COMPORTAMENTO DOS CARDS (PÁGINA PRINCIPAL)
 --------------------------------------------------------------------------------
+- Layout com 3 Cards Centrais:
+  * O quarto card ("Minhas Medalhas") foi retirado da tela principal, deixando
+    uma grade limpa e harmoniosa de 3 cards:
+    1. Card 1 (JOGO 01): COMPLETE THE SENTENCE (English Quiz)
+    2. Card 2 (JOGO 02): POP THE BALLOONS (Sentence Builder)
+    3. Card 3 (RANKING): TOP SABIDOS (Mural de Conquistas e Melhores Pontuações)
 - Disposição em Zig-Zag:
-  * Cards organizados em eixo horizontal alternando posições (2 ligeiramente
-    elevados e 2 ligeiramente rebaixados).
+  * Cards organizados em grade responsiva (1 coluna no mobile, 3 colunas a
+    partir de md / max-w-5xl) alternando posições sutis de elevação.
 - Inclinação Lúdica:
-  * Cada card possui uma rotação inicial sutil (tortos/inclinados alternados
-    entre esquerda e direita: -3.5deg, +3.5deg, -2.5deg, +2.8deg).
+  * Cada card possui uma rotação inicial sutil (tortos/inclinados alternados:
+    -3deg, +3.2deg, -2deg).
 - Efeito Hover (Desentortar):
   * Ao passar o cursor do mouse (hover), o card se desentorta suavemente para
-    rotação 0deg, elevando-se ligeiramente com física elástica (cubic-bezier) e
-    aumentando de escala (scale 1.04).
+    rotação 0deg, elevando-se com física elástica e aumentando de escala (scale 1.04).
 
 --------------------------------------------------------------------------------
-4. PADRONIZAÇÃO DE NOMENCLATURAS E ESTRUTURAÇÃO DE CÓDIGO
+4. PADRONIZAÇÃO LINUX (SNAKE_CASE) E ESTRUTURAÇÃO DE CÓDIGO
 --------------------------------------------------------------------------------
+- Compatibilidade Total com Máquinas e Servidores Linux:
+  * Todos os nomes de arquivos e diretórios que continham traços ('-'), espaços
+    ou extensões/nomes em maiúsculas foram renomeados estritamente para minúsculas
+    em formato snake_case ('_'), garantindo 100% de compatibilidade com sistemas
+    de arquivos case-sensitive (ext4/Linux):
+    - `jogo-baloes.php` → `jogo_baloes.php`
+    - `jogo-ingles.php` → `jogo_ingles.php`
+    - `temas-baloes.php` → `temas_baloes.php`
+    - `temas-ingles.php` → `temas_ingles.php`
+    - `css/index-php.css` → `css/index_php.css`
+    - `css/jogo-baloes.css` → `css/jogo_baloes.css`
+    - `css/jogo-ingles.css` → `css/jogo_ingles.css`
+    - `css/temas-ingles.css` → `css/temas_ingles.css`
+    - `fonts/cute_dolphin/Cute Dolphin.ttf` → `fonts/cute_dolphin/cute_dolphin.ttf`
+    - `fonts/good_dog/gooddog.TTF` → `fonts/good_dog/gooddog.ttf`
+    - `fonts/bingo/BINGO.ttf` → `fonts/bingo/bingo.ttf`
+    - `fundo-resposta-completar/` → `fundo_resposta_completar/`
+    - `post-it/` → `post_it/`
+    - `baloes/cores/balao-[cor].gif` → `baloes/cores/balao_[cor].gif`
 - Classes e Identificadores (IDs):
   * Todos os IDs e classes CSS foram traduzidos e padronizados semanticamente
     para o português (ex.: #livro-conteiner-principal, #cabecalho-principal,
-    .cartao-dinamico, .cartao-zigzag-cima, .cartao-arredondado, etc.).
+    .cartao-dinamico, .cartao-zigzag-cima, etc.).
 - Modularização do CSS:
-  * Todo o CSS antes embutido inline foi extraído para folhas de estilo
-    externas na pasta /css:
+  * Folhas de estilo modularizadas na pasta /css:
     - css/index.css (para index.html)
-    - css/index-php.css (para index.php)
-    - css/jogo-ingles.css (para jogo-ingles.php)
+    - css/index_php.css (para index.php)
+    - css/temas_ingles.css (para temas_ingles.php e temas_baloes.php)
+    - css/jogo_ingles.css (para jogo_ingles.php)
+    - css/jogo_baloes.css (para jogo_baloes.php)
 
 --------------------------------------------------------------------------------
 5. DESENVOLVIMENTO DO PRIMEIRO JOGO: QUIZ DE INGLÊS (GAP FILL)
@@ -242,44 +267,52 @@ Foco Pedagógico Atual: Língua Inglesa (English for Kids)
   * Suporte a separação de quizzes e frases por tema via query string (`?tema=1`, `?tema=7`, etc.).
 
 --------------------------------------------------------------------------------
-9. MAPA ATUAL DE ARQUIVOS DO PROJETO
+9. MAPA ATUAL DE ARQUIVOS DO PROJETO (ESTRUTURA LINUX COMPATÍVEL)
 --------------------------------------------------------------------------------
-c:\Users\sesi2b\laragon\www\Tcc-Projeto\
+c:\laragon\www\Tcc-Projeto\
 │
-├── index.html                   # Página inicial estática (HTML/Tailwind)
-├── index.php                    # Página inicial dinâmica (PHP com cards interativos)
-├── temas-ingles.php             # Seleção de Temas — Jogo 1 (Post-its lúdicos)
-├── jogo-ingles.php              # Jogo 1: Complete the Sentence (Gap Fill Quiz)
-├── temas-baloes.php             # Seleção de Temas — Jogo 2 (Post-its lúdicos)
-├── jogo-baloes.php              # Jogo 2: Estoure os Balões (Build the Sentence)
+├── index.html                   # Página inicial estática (HTML/Tailwind - 3 Cards)
+├── index.php                    # Página inicial dinâmica (PHP/Tailwind - 3 Cards)
+├── temas_ingles.php             # Seleção de Temas — Jogo 1 (Post-its lúdicos)
+├── jogo_ingles.php              # Jogo 1: Complete the Sentence (Gap Fill Quiz)
+├── temas_baloes.php             # Seleção de Temas — Jogo 2 (Post-its lúdicos)
+├── jogo_baloes.php              # Jogo 2: Estoure os Balões (Pop the Balloons)
 ├── RESUMO_PROJETO.txt           # Este documento oficial de histórico e status
+├── DESIGN.md                    # Especificação do Design System
 │
 ├── css/
 │   ├── index.css                # Estilos da página index.html
-│   ├── index-php.css            # Estilos da página index.php
-│   ├── temas-ingles.css         # Estilos da seleção de temas (post-its e cards)
-│   ├── jogo-ingles.css          # Estilos do jogo de preencher lacunas
-│   └── jogo-baloes.css          # Estilos do jogo dos balões (céu azul, slots, animações)
+│   ├── index_php.css            # Estilos da página index.php
+│   ├── temas_ingles.css         # Estilos da seleção de temas (post-its e cards)
+│   ├── jogo_ingles.css          # Estilos do jogo de preencher lacunas
+│   └── jogo_baloes.css          # Estilos do jogo dos balões (céu azul, slots, animações)
 │
 ├── baloes/
-│   └── verde/
-│       ├── inteiro/             # Frames do balão verde oscilante (00 a 36 e 46)
-│       └── Exploding/           # Frames da explosão do balão (37 a 45)
+│   ├── pop.gif                  # Animação oficial de explosão dos balões
+│   ├── cores/                   # Gifs com balões coloridos em rotação/flutuação
+│   │   ├── balao_amarelo.gif
+│   │   ├── balao_laranja.gif
+│   │   ├── balao_rosa.gif
+│   │   ├── balao_verde.gif
+│   │   └── balao_vermelho.gif
+│   └── exploding/
+│       └── pop.gif
 │
 ├── fonts/
-│   ├── good_dog/gooddog.TTF     # Fonte para títulos principais (Gooddog)
-│   ├── bingo/BINGO.ttf          # Fonte para textos, badges e botões (Bingo)
-│   ├── child_dream_2/dream.ttf  # Fonte alternativa Dream
-│   └── cute_dolphin/            # Fonte Cute Dolphin (títulos dos post-its)
+│   ├── good_dog/gooddog.ttf     # Fonte para títulos principais (Gooddog)
+│   ├── bingo/bingo.ttf          # Fonte para textos, badges e botões (Bingo)
+│   ├── cute_dolphin/cute_dolphin.ttf # Fonte Cute Dolphin (títulos dos post-its)
+│   └── child_dream_2/dream.ttf  # Fonte alternativa Dream
 │
-├── post-it/                     # Imagens PNG de post-its estilizados (1.png a 6.png)
-├── fundo-resposta-completar/    # Fitas de papel colorido para o Gap (1.png a 7.png)
+├── post_it/                     # Imagens PNG de post-its estilizados (1.png a 6.png)
+├── fundo_resposta_completar/    # Fitas de papel colorido para o Gap (1.png a 7.png)
 │
 ├── banco/
-│   └── jogo_ingles_migration.sql # Script SQL oficial (Jogos 1 e 2, Temas, Perguntas e Frases)
+│   ├── jogo_ingles_migration.sql # Script SQL oficial de migração
+│   └── tccdb_hosting.sql         # Script SQL pronto para hosting externo / remoto
 │
 └── config/
-    ├── config.php               # Conexão centralizada com o banco tccdb (porta 3308)
+    ├── config.php               # Conexão centralizada com o banco tccdb
     └── proteger.php             # Script auxiliar de proteção/sessão
 ================================================================================
 FIM DO RELATÓRIO

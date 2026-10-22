@@ -1,6 +1,6 @@
 <?php
 /* ============================================================
-   jogo-baloes.php — Estoure os Balões! (Pop the Balloons)
+   jogo_baloes.php — Estoure os Balões! (Pop the Balloons)
    English for Kids — Fundamental 1 | Sentence Builder Game
    Schema: tccdb | Jogo ('ballons') → Tema → Frases
    ============================================================ */
@@ -141,11 +141,11 @@ if (!empty($baloes_cores_arquivos)) {
 }
 if (empty($baloes_cores)) {
     $baloes_cores = [
-        'baloes/cores/balao-amarelo.gif',
-        'baloes/cores/balao-laranja.gif',
-        'baloes/cores/balao-rosa.gif',
-        'baloes/cores/balao-verde.gif',
-        'baloes/cores/balao-vermelho.gif',
+        'baloes/cores/balao_amarelo.gif',
+        'baloes/cores/balao_laranja.gif',
+        'baloes/cores/balao_rosa.gif',
+        'baloes/cores/balao_verde.gif',
+        'baloes/cores/balao_vermelho.gif',
     ];
 }
 $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
@@ -199,7 +199,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
     </script>
 
     <!-- CSS do jogo de balões -->
-    <link rel="stylesheet" href="css/jogo-baloes.css">
+    <link rel="stylesheet" href="css/jogo_baloes.css">
 </head>
 <body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
 
@@ -237,7 +237,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                 class="w-full flex flex-wrap items-center justify-between gap-4 pb-4 mb-4">
 
             <!-- Botão Voltar para Seleção de Temas -->
-            <a href="temas-baloes.php"
+            <a href="temas_baloes.php"
                class="cartao-dinamico flex items-center gap-2 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca font-bingo font-bold text-sm text-tinta-escura hover:bg-yellow-100 transition-colors"
                style="text-decoration: none;">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -292,7 +292,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
             <div id="seletor-temas" class="flex flex-wrap items-center justify-center gap-2 -mt-1">
                 <span class="font-bingo font-black text-xs text-gray-500 uppercase tracking-widest mr-1">TOPICS:</span>
                 <?php foreach ($temas_disponiveis as $t): ?>
-                    <a href="jogo-baloes.php?tema=<?= urlencode($t['id']) ?>"
+                    <a href="jogo_baloes.php?tema=<?= urlencode($t['id']) ?>"
                        class="cartao-dinamico px-3.5 py-1.5 rounded-xl font-bingo font-bold text-xs border-2 border-tinta-escura transition-all <?= ($tema_ativo && $tema_ativo['id'] === $t['id']) ? 'bg-amarelo-vibrante text-tinta-escura shadow-sombra-cartum-branca scale-105' : 'bg-papel-claro text-gray-600 hover:bg-white' ?>"
                        style="text-decoration: none;">
                         <?= htmlspecialchars(ucfirst($t['nome'])) ?> (<?= $t['total_frases'] ?>)
@@ -359,7 +359,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                     No sentences found for this topic.<br>
                     Please add sentences in the Frases table!
                 </p>
-                <a href="temas-baloes.php"
+                <a href="temas_baloes.php"
                    class="botao-acao mt-6 bg-azul-vibrante text-white inline-flex"
                    style="text-decoration: none;">
                     ← Back to Topics
@@ -413,7 +413,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                     </svg>
                 </button>
 
-                <a href="temas-baloes.php"
+                <a href="temas_baloes.php"
                    class="botao-acao bg-amarelo-vibrante text-tinta-escura w-full sm:w-auto"
                    style="text-decoration:none;">
                     <span>OTHER TOPICS</span>

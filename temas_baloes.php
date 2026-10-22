@@ -1,6 +1,6 @@
 <?php
 /* ============================================================
-   temas-baloes.php — Seleção de Temas (Post-its Estilizados)
+   temas_baloes.php — Seleção de Temas (Post-its Estilizados)
    English for Kids — Fundamental 1 | Pop the Balloons
    Schema: tccdb | Tema (id_jogo = 2)
    ============================================================ */
@@ -39,7 +39,7 @@ if (empty($temas)) {
     }
 }
 
-// Designs disponíveis na pasta post-it (1.png a 6.png)
+// Designs disponíveis na pasta post_it (1.png a 6.png)
 $designs_disponiveis = [1, 2, 3, 4, 5, 6];
 $total_designs = count($designs_disponiveis);
 
@@ -121,7 +121,7 @@ $inclinacoes = [
     </script>
 
     <!-- CSS personalizado dos Temas e Post-its -->
-    <link rel="stylesheet" href="css/temas-ingles.css">
+    <link rel="stylesheet" href="css/temas_ingles.css">
 </head>
 <body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
 
@@ -203,7 +203,7 @@ $inclinacoes = [
             <?php if (!empty($temas)): ?>
 
             <!-- FORMULÁRIO DE SELEÇÃO: ENVIA GET 'tema' COM O ID DO TEMA SELECIONADO -->
-            <form action="jogo-baloes.php" method="GET" id="form-selecao-temas" class="w-full">
+            <form action="jogo_baloes.php" method="GET" id="form-selecao-temas" class="w-full">
                 <div id="grade-postits"
                      class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-8 md:gap-10 justify-items-center items-center py-4">
 
@@ -224,7 +224,7 @@ $inclinacoes = [
                                 aria-label="Topic <?= htmlspecialchars($nome_tema) ?>">
 
                             <!-- Imagem do Post-it estilizado -->
-                            <img src="post-it/<?= $num_design ?>.png"
+                            <img src="post_it/<?= $num_design ?>.png"
                                  alt="Post-it <?= htmlspecialchars($nome_tema) ?>"
                                  class="postit-imagem"
                                  draggable="false">
