@@ -187,7 +187,7 @@ if ($userId > 0) {
                     
                     <div class="my-3">
                         <h3 class="font-gooddog text-2xl sm:text-3xl font-bold leading-tight uppercase text-white tracking-wider">
-                            ESTOURE OS BALÕES
+                            ESTOURE OS BALOES
                         </h3>
                         <p class="font-bingo text-xs sm:text-sm font-extrabold text-orange-100 mt-1 tracking-wide">
                             Pop balloons to build sentences!
