@@ -685,3 +685,75 @@ body {
     transform: translate(-50%, -50%) scale(1.1) !important;
     transition: opacity 0.45s ease-out !important;
 }
+
+/* ============================================================
+   RESPONSIVIDADE DISPOSITIVOS MÓVEIS (9:16 E TELAS COMPACTAS)
+   ============================================================ */
+@media (max-width: 640px) {
+    .area-baloes {
+        min-height: 330px !important;
+        height: 370px !important;
+        max-height: 400px !important;
+        border-radius: 20px !important;
+        border-width: 4px !important;
+    }
+
+    .balao-img {
+        width: 100px !important;
+        height: 124px !important;
+    }
+
+    .balao-palavra,
+    .balao-texto {
+        font-size: 1.05rem !important;
+        max-width: 88px !important;
+        top: 36% !important;
+    }
+
+    .frase-construcao {
+        min-height: 52px !important;
+        padding: 8px 10px !important;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .palavra-slot {
+        min-width: 48px !important;
+        min-height: 36px !important;
+        padding: 5px 10px !important;
+        font-size: 0.95rem !important;
+    }
+
+    .caderno-pagina-branca {
+        padding: 0.85rem !important;
+        border-width: 4px !important;
+        box-shadow: 0px 8px 0px #0F172A !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .area-baloes {
+        min-height: 290px !important;
+        height: 330px !important;
+        max-height: 360px !important;
+    }
+
+    .balao-img {
+        width: 82px !important;
+        height: 102px !important;
+    }
+
+    .balao-palavra,
+    .balao-texto {
+        font-size: 0.88rem !important;
+        max-width: 74px !important;
+        top: 36% !important;
+    }
+
+    .palavra-slot {
+        min-width: 42px !important;
+        min-height: 32px !important;
+        padding: 4px 8px !important;
+        font-size: 0.85rem !important;
+    }
+}

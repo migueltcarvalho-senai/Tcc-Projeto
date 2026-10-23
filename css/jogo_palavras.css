@@ -536,41 +536,59 @@ body {
    RESPONSIVIDADE
    ============================================================ */
 @media (max-width: 640px) {
+    .caderno-pagina-branca {
+        padding: 0.85rem !important;
+        border-width: 4px !important;
+        box-shadow: 0px 8px 0px #0F172A !important;
+    }
+
     #area-letras {
-        min-height: 220px;
-        gap: 10px;
-        padding: 20px 16px;
+        min-height: 200px;
+        gap: 8px;
+        padding: 16px 12px;
+        border-radius: 16px;
     }
 
     .letra-btn {
-        width: 58px;
-        height: 58px;
-        font-size: 1.9rem;
+        width: clamp(48px, 13vw, 58px);
+        height: clamp(48px, 13vw, 58px);
+        font-size: 1.8rem;
         border-radius: 12px;
     }
 
     .texto-traducao {
-        font-size: 2.4rem;
+        font-size: 2.2rem;
     }
 
     .letra-slot {
-        width: 44px;
-        height: 44px;
-        font-size: 1.5rem;
+        width: clamp(34px, 9vw, 44px);
+        height: clamp(34px, 9vw, 44px);
+        font-size: 1.35rem;
+    }
+
+    #slots-palavra {
+        gap: 6px;
+        padding: 10px 8px;
     }
 }
 
 @media (max-width: 380px) {
+    #area-letras {
+        min-height: 180px;
+        gap: 6px;
+        padding: 12px 8px;
+    }
+
     .letra-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.6rem;
+        width: 46px;
+        height: 46px;
+        font-size: 1.5rem;
     }
 
     .letra-slot {
-        width: 38px;
-        height: 38px;
-        font-size: 1.3rem;
+        width: 32px;
+        height: 32px;
+        font-size: 1.15rem;
     }
 }
 

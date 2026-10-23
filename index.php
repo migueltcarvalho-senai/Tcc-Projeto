@@ -262,7 +262,7 @@ if ($userId > 0) {
             </div>
 
             <!-- CARD RANKING HORIZONTAL DESTACADO -->
-            <div id="card-ranking" onclick="abrirModulo('Ranking')" class="cartao-dinamico w-full max-w-2xl mt-4 mb-2 bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-5 shadow-sombra-cartum-azul flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer group">
+            <a id="card-ranking" href="ranking.php" style="text-decoration: none;" class="cartao-dinamico w-full max-w-2xl mt-4 mb-2 bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-5 shadow-sombra-cartum-azul flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer group no-underline">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white shrink-0">
                         <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
@@ -289,7 +289,7 @@ if ($userId > 0) {
                         <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
                 </div>
-            </div>
+            </a>
 
         </main>
 

@@ -571,10 +571,13 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
                 textoSpan.className = 'balao-palavra balao-texto';
                 textoSpan.textContent = item.texto;
 
+                const isMobileScreen = window.innerWidth <= 640;
                 if (item.texto.length > 7) {
-                    textoSpan.style.fontSize = '1.05rem';
+                    textoSpan.style.fontSize = isMobileScreen ? '0.85rem' : '1.05rem';
                 } else if (item.texto.length > 5) {
-                    textoSpan.style.fontSize = '1.25rem';
+                    textoSpan.style.fontSize = isMobileScreen ? '0.95rem' : '1.25rem';
+                } else if (isMobileScreen) {
+                    textoSpan.style.fontSize = '1.05rem';
                 }
 
                 balao.appendChild(img);
