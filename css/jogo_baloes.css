@@ -593,3 +593,95 @@ body {
         animation: none;
     }
 }
+
+
+/* ============================================================
+   CORREÇÃO DE POSICIONAMENTO DOS BALÕES FLUTUANTES
+   Garante centralização, animação e visibilidade das palavras
+   ============================================================ */
+.area-baloes {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.balao-container,
+.balao-item {
+    position: absolute !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: filter 0.18s ease, transform 0.15s ease !important;
+    z-index: 10 !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    box-sizing: border-box !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+.balao-container:hover,
+.balao-item:hover {
+    filter: brightness(1.1) drop-shadow(0 8px 18px rgba(15, 23, 42, 0.35)) !important;
+    transform: translate(-50%, -50%) scale(1.08) !important;
+    z-index: 25 !important;
+}
+
+.balao-container:active,
+.balao-item:active {
+    transform: translate(-50%, -50%) scale(0.96) !important;
+}
+
+.balao-img {
+    width: 155px !important;
+    height: 185px !important;
+    object-fit: contain !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.18)) !important;
+}
+
+.balao-palavra,
+.balao-texto {
+    position: absolute !important;
+    top: 38% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-family: 'Bingo', cursive, sans-serif !important;
+    font-size: 1.45rem !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
+    text-shadow:
+        0 2px 0 #0F172A,
+        0 -2px 0 #0F172A,
+        2px 0 0 #0F172A,
+        -2px 0 0 #0F172A,
+        0 4px 8px rgba(0, 0, 0, 0.75) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    text-align: center !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+    max-width: 140px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    padding: 0 6px !important;
+}
+
+@keyframes balaoFlutuandoSuave {
+    0%   { transform: translate(-50%, -50%) translateY(0px) rotate(-1.5deg); }
+    50%  { transform: translate(-50%, -50%) translateY(-10px) rotate(1.5deg); }
+    100% { transform: translate(-50%, -50%) translateY(0px) rotate(-1.5deg); }
+}
+
+.balao-animando {
+    animation: balaoFlutuandoSuave 3s ease-in-out infinite alternate !important;
+}
+
+.balao-estourado {
+    pointer-events: none !important;
+    animation: none !important;
+    transform: translate(-50%, -50%) scale(1.1) !important;
+    transition: opacity 0.45s ease-out !important;
+}

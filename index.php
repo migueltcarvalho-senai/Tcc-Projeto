@@ -107,7 +107,7 @@ if ($userId > 0) {
             <div class="espiral-caderno hidden md:block"></div>
         </div>
 
-        <!-- BARRA SUPERIOR DO LIVRO (ALUNO, PLACAR & SAIR) -->
+        <!-- BARRA SUPERIOR DO LIVRO (ALUNO, PLACAR & LOGOUT) -->
         <header id="cabecalho-principal" class="w-full flex flex-wrap items-center justify-between gap-3 pb-3 mb-4">
             <div class="flex items-center gap-2.5">
                 <span class="bg-papel-claro borda-tinta-escura rounded-xl px-3.5 py-1.5 font-bingo font-bold text-xs sm:text-sm text-tinta-escura shadow-sombra-cartum-branca">
@@ -117,8 +117,13 @@ if ($userId > 0) {
                     <span class="font-gooddog text-xl text-tinta-escura font-bold leading-none"><?= $pontosUsuario ?></span> PTS
                 </span>
             </div>
-            <a href="logout.php" title="Encerrar sessão" class="cartao-dinamico bg-red-500 hover:bg-red-600 text-white borda-tinta-escura rounded-xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca transition-colors">
-                SAIR
+
+            <!-- BOTÃO DE LOGOUT COM ÍCONE -->
+            <a href="logout.php" id="btn-logout" title="Fazer Logout e Encerrar Sessão" class="cartao-dinamico flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white borda-tinta-escura rounded-xl px-4 py-2 font-bingo font-bold text-sm shadow-sombra-cartum-branca transition-all no-underline">
+                <svg class="w-4 h-4 fill-none stroke-current" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                <span>LOGOUT</span>
             </a>
         </header>
 
@@ -126,20 +131,20 @@ if ($userId > 0) {
         <main id="conteudo-principal" class="w-full my-auto flex flex-col items-center">
             
             <!-- TÍTULO DA ATIVIDADE -->
-            <div id="secao-titulo-atividade" class="text-center max-w-4xl mb-8 space-y-2">
+            <div id="secao-titulo-atividade" class="text-center max-w-4xl mb-6 space-y-2">
                 <h2 class="font-gooddog text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-tinta-escura leading-tight tracking-wider">
                     O QUE VAMOS APRENDER HOJE?
                 </h2>
                 <p class="font-bingo text-lg sm:text-xl md:text-2xl font-extrabold text-gray-700 tracking-wide">
-                    Escolha um dos cards coloridos abaixo para começar!
+                    Escolha um dos 4 jogos abaixo para começar!
                 </p>
             </div>
 
-            <!-- GRADE DE CARDS (5 CARDS: 4 JOGOS + RANKING) -->
-            <div id="grade-atividades" class="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 px-2 py-4">
+            <!-- GRADE DOS 4 JOGOS (4 COLUNAS RESPONSIVAS) -->
+            <div id="grade-atividades" class="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-2 py-4">
                 
                 <!-- CARD 1: JOGO DE INGLÊS (COMPLETE THE SENTENCE) -->
-                <a id="card-ingles" href="temas_ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-5 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-ingles" href="temas_ingles.php" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-esquerda bg-verde-vibrante text-white cartao-borda-verde cartao-arredondado p-6 shadow-sombra-cartum-verde flex flex-col justify-between min-h-[260px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-verde-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-verde-escuro rounded-xl">
                             JOGO 01
@@ -167,7 +172,7 @@ if ($userId > 0) {
                 </a>
 
                 <!-- CARD 2: JOGO DOS BALÕES (ESTOURE OS BALÕES) -->
-                <a id="card-baloes" href="temas_baloes.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-5 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-baloes" href="temas_baloes.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-direita bg-laranja-vibrante text-white cartao-borda-laranja cartao-arredondado p-6 shadow-sombra-cartum-laranja flex flex-col justify-between min-h-[260px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-laranja-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-laranja-escuro rounded-xl">
                             JOGO 02
@@ -197,7 +202,7 @@ if ($userId > 0) {
                 </a>
 
                 <!-- CARD 3: MONTAGEM DE PALAVRAS (SPELL THE WORD) -->
-                <a id="card-palavras" href="temas_palavras.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-rosa-vibrante text-white cartao-borda-rosa cartao-arredondado p-5 shadow-sombra-cartum-rosa flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-palavras" href="temas_palavras.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-rosa-vibrante text-white cartao-borda-rosa cartao-arredondado p-6 shadow-sombra-cartum-rosa flex flex-col justify-between min-h-[260px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-papel-branco text-pink-700 font-bingo text-xs font-extrabold px-3 py-1 border-2 border-pink-700 rounded-xl">
                             JOGO 03
@@ -225,7 +230,7 @@ if ($userId > 0) {
                 </a>
 
                 <!-- CARD 4: OUÇA E ESCOLHA (LISTEN AND CHOOSE) -->
-                <a id="card-ouvir" href="temas_ouvir.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-leve-direita bg-amarelo-vibrante text-tinta-escura cartao-borda-amarela cartao-arredondado p-5 shadow-sombra-cartum-amarela flex flex-col justify-between min-h-[250px] cursor-pointer group no-underline">
+                <a id="card-ouvir" href="temas_ouvir.php" style="text-decoration: none;" class="cartao-dinamico cartao-zigzag-baixo cartao-inclinado-leve-direita bg-amarelo-vibrante text-tinta-escura cartao-borda-amarela cartao-arredondado p-6 shadow-sombra-cartum-amarela flex flex-col justify-between min-h-[260px] cursor-pointer group no-underline">
                     <div class="flex items-center justify-between">
                         <span class="bg-tinta-escura text-white font-bingo text-xs font-extrabold px-3 py-1 border-2 border-tinta-escura rounded-xl">
                             JOGO 04
@@ -254,36 +259,36 @@ if ($userId > 0) {
                     </div>
                 </a>
 
-                <!-- CARD 5: RANKING -->
-                <div id="card-ranking" onclick="abrirModulo('Ranking')" class="cartao-dinamico cartao-zigzag-cima cartao-inclinado-leve-esquerda bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-5 shadow-sombra-cartum-azul flex flex-col justify-between min-h-[250px] cursor-pointer group">
-                    <div class="flex items-center justify-between">
-                        <span class="bg-papel-branco text-azul-escuro font-bingo text-xs font-extrabold px-3 py-1 border-2 border-azul-escuro rounded-xl">
-                            TOP SABIDOS
-                        </span>
-                        <div class="w-10 h-10 bg-white/25 border-2 border-azul-escuro rounded-xl flex items-center justify-center text-white">
-                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                                <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    
-                    <div class="my-3">
-                        <h3 class="font-gooddog text-2xl sm:text-3xl font-bold leading-tight uppercase text-white tracking-wider">
-                            RANKING
-                        </h3>
-                        <p class="font-bingo text-xs sm:text-sm font-extrabold text-blue-100 mt-1 tracking-wide">
-                            Veja os melhores pontuadores!
-                        </p>
-                    </div>
+            </div>
 
-                    <div class="w-full bg-papel-branco text-azul-escuro font-bingo font-extrabold text-sm py-2.5 px-3 border-2 border-azul-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors">
-                        <span>VER RANKING</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
+            <!-- CARD RANKING HORIZONTAL DESTACADO -->
+            <div id="card-ranking" onclick="abrirModulo('Ranking')" class="cartao-dinamico w-full max-w-2xl mt-4 mb-2 bg-azul-vibrante text-white cartao-borda-azul cartao-arredondado p-5 shadow-sombra-cartum-azul flex flex-col sm:flex-row items-center justify-between gap-4 cursor-pointer group">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-white/25 border-2 border-azul-escuro rounded-2xl flex items-center justify-center text-white shrink-0">
+                        <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                            <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
                         </svg>
                     </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-papel-branco text-azul-escuro font-bingo text-xs font-extrabold px-3 py-0.5 border-2 border-azul-escuro rounded-xl">
+                                PLACAR GERAL
+                            </span>
+                        </div>
+                        <h3 class="font-gooddog text-3xl font-bold leading-tight uppercase text-white tracking-wider mt-1">
+                            TOP SABIDOS — RANKING
+                        </h3>
+                        <p class="font-bingo text-xs sm:text-sm font-extrabold text-blue-100 tracking-wide">
+                            Veja os melhores pontuadores da escola!
+                        </p>
+                    </div>
                 </div>
-
+                <div class="bg-papel-branco text-azul-escuro font-bingo font-extrabold text-sm py-3 px-6 border-2 border-azul-escuro rounded-2xl text-center flex items-center justify-center gap-2 group-hover:bg-amarelo-vibrante group-hover:text-tinta-escura transition-colors shrink-0">
+                    <span>VER RANKING</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
             </div>
 
         </main>

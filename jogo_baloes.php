@@ -552,7 +552,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
                 const corGif = baloesCoresDisponiveis[index % baloesCoresDisponiveis.length] || 'baloes/cores/balao_amarelo.gif';
 
                 const balao = document.createElement('div');
-                balao.className = 'balao-item balao-animando';
+                balao.className = 'balao-container balao-item balao-animando';
                 balao.id = `balao-${index}`;
                 balao.style.left = `${pos.left}%`;
                 balao.style.top  = `${pos.top}%`;
@@ -568,7 +568,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
                 img.draggable = false;
 
                 const textoSpan = document.createElement('span');
-                textoSpan.className = 'balao-texto';
+                textoSpan.className = 'balao-palavra balao-texto';
                 textoSpan.textContent = item.texto;
 
                 if (item.texto.length > 7) {
@@ -592,30 +592,33 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
 
         function calcularPosicoesBaloes(qtd) {
             const layouts = {
-                1: [{ left: 50, top: 40 }],
-                2: [{ left: 32, top: 40 }, { left: 68, top: 40 }],
-                3: [{ left: 22, top: 42 }, { left: 50, top: 38 }, { left: 78, top: 42 }],
+                1: [{ left: 50, top: 45 }],
+                2: [{ left: 30, top: 45 }, { left: 70, top: 45 }],
+                3: [{ left: 22, top: 45 }, { left: 50, top: 40 }, { left: 78, top: 45 }],
                 4: [
-                    { left: 28, top: 24 }, { left: 72, top: 24 },
-                    { left: 28, top: 62 }, { left: 72, top: 62 }
+                    { left: 26, top: 28 }, { left: 74, top: 28 },
+                    { left: 26, top: 70 }, { left: 74, top: 70 }
                 ],
                 5: [
-                    { left: 20, top: 22 }, { left: 50, top: 18 }, { left: 80, top: 22 },
-                    { left: 35, top: 62 }, { left: 65, top: 62 }
+                    { left: 20, top: 28 }, { left: 50, top: 24 }, { left: 80, top: 28 },
+                    { left: 35, top: 70 }, { left: 65, top: 70 }
                 ],
                 6: [
-                    { left: 20, top: 22 }, { left: 50, top: 20 }, { left: 80, top: 22 },
-                    { left: 20, top: 62 }, { left: 50, top: 64 }, { left: 80, top: 62 }
+                    { left: 20, top: 28 }, { left: 50, top: 26 }, { left: 80, top: 28 },
+                    { left: 20, top: 70 }, { left: 50, top: 72 }, { left: 80, top: 70 }
                 ]
             };
 
             if (layouts[qtd]) return layouts[qtd];
 
             const coords = [];
+            const cols = Math.min(4, Math.ceil(qtd / 2));
             for (let i = 0; i < qtd; i++) {
+                const row = i < cols ? 0 : 1;
+                const colIdx = i % cols;
                 coords.push({
-                    left: 15 + ((i % 4) * 22),
-                    top:  i < 4 ? 22 : 62
+                    left: Math.round(18 + (colIdx * (64 / Math.max(1, cols - 1)))),
+                    top:  row === 0 ? 28 : 70
                 });
             }
             return coords;
