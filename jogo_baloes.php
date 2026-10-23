@@ -2,7 +2,7 @@
 /* ============================================================
    jogo_baloes.php — Estoure os Balões! (Pop the Balloons)
    English for Kids — Fundamental 1 | Sentence Builder Game
-   Schema: tccdb | Jogo ('ballons') → Tema → Frases
+   Refatorado para total compatibilidade Linux / MySQL case-sensitive
    ============================================================ */
 
 require_once __DIR__ . '/config/config.php';
@@ -10,42 +10,49 @@ require_once __DIR__ . '/config/proteger.php';
 
 $id_jogo = 2;
 
+// Resolução dinâmica do nome real das tabelas (Linux case-sensitivity)
+$tbl_tema   = db_table($conn, 'Tema');
+$tbl_frases = db_table($conn, 'Frases');
+
 // 1. Obter todos os temas disponíveis para o jogo dos balões
+$temas_disponiveis = [];
 $sql_temas = "
     SELECT
         t.`id`,
         t.`nome`,
         COUNT(f.`id`) AS total_frases
-    FROM `Tema` t
-    LEFT JOIN `Frases` f ON f.`id_tema` = t.`id`
+    FROM {$tbl_tema} t
+    LEFT JOIN {$tbl_frases} f ON f.`id_tema` = t.`id`
     WHERE t.`id_jogo` = ?
     GROUP BY t.`id`, t.`nome`
     ORDER BY t.`id` ASC
 ";
 $stmt_temas = $conn->prepare($sql_temas);
-$stmt_temas->bind_param("i", $id_jogo);
-$stmt_temas->execute();
-$res_temas = $stmt_temas->get_result();
-
-$temas_disponiveis = [];
-while ($t = $res_temas->fetch_assoc()) {
-    $temas_disponiveis[] = [
-        'id'           => (int) $t['id'],
-        'nome'         => $t['nome'],
-        'total_frases' => (int) $t['total_frases'],
-    ];
+if ($stmt_temas) {
+    $stmt_temas->bind_param("i", $id_jogo);
+    $stmt_temas->execute();
+    $res_temas = $stmt_temas->get_result();
+    if ($res_temas) {
+        while ($t = $res_temas->fetch_assoc()) {
+            $temas_disponiveis[] = [
+                'id'           => (int) $t['id'],
+                'nome'         => $t['nome'],
+                'total_frases' => (int) $t['total_frases'],
+            ];
+        }
+    }
+    $stmt_temas->close();
 }
-$stmt_temas->close();
 
-// Fallback de segurança: caso id_jogo ainda não esteja configurado no banco, busca temas vinculados a frases
+// Fallback de segurança: busca temas que possuam frases caso id_jogo esteja nulo
 if (empty($temas_disponiveis)) {
     $sql_fb = "
         SELECT
             t.`id`,
             t.`nome`,
             COUNT(f.`id`) AS total_frases
-        FROM `Tema` t
-        INNER JOIN `Frases` f ON f.`id_tema` = t.`id`
+        FROM {$tbl_tema} t
+        INNER JOIN {$tbl_frases} f ON f.`id_tema` = t.`id`
         GROUP BY t.`id`, t.`nome`
         ORDER BY t.`id` ASC
     ";
@@ -61,7 +68,7 @@ if (empty($temas_disponiveis)) {
     }
 }
 
-// 2. Determinar o tema ativo selecionado via GET (tema ou id_tema)
+// 2. Determinar o tema ativo selecionado via GET
 $tema_param = $_GET['tema'] ?? $_GET['id_tema'] ?? null;
 $tema_ativo = null;
 
@@ -75,7 +82,6 @@ if (!empty($temas_disponiveis)) {
         }
     }
 
-    // Se nenhum tema foi especificado ou encontrado, usa o primeiro tema
     if (!$tema_ativo) {
         $tema_ativo = $temas_disponiveis[0];
     }
@@ -88,40 +94,39 @@ if ($tema_ativo) {
         SELECT
             f.*,
             t.`nome` AS tema_nome
-        FROM `Frases` f
-        INNER JOIN `Tema` t ON t.`id` = f.`id_tema`
+        FROM {$tbl_frases} f
+        INNER JOIN {$tbl_tema} t ON t.`id` = f.`id_tema`
         WHERE f.`id_tema` = ?
         ORDER BY f.`id` ASC
     ";
     $stmt_frases = $conn->prepare($sql_frases);
-    $id_tema_busca = $tema_ativo['id'];
-    $stmt_frases->bind_param("i", $id_tema_busca);
-    $stmt_frases->execute();
-    $res_frases = $stmt_frases->get_result();
+    if ($stmt_frases) {
+        $id_tema_busca = $tema_ativo['id'];
+        $stmt_frases->bind_param("i", $id_tema_busca);
+        $stmt_frases->execute();
+        $res_frases = $stmt_frases->get_result();
 
-    while ($linha = $res_frases->fetch_assoc()) {
-        $frase_original = trim($linha['frase']);
+        if ($res_frases) {
+            while ($linha = $res_frases->fetch_assoc()) {
+                $frase_original = trim($linha['frase'] ?? '');
+                if ($frase_original === '') continue;
 
-        /* ============================================================
-           MÉTODO EXPLODE DO PHP CONFORME ESPECIFICADO NO PROMPT:
-           Separa a frase da tabela Frases em palavras individuais
-           e guarda a frase original em variável de controle.
-           ============================================================ */
-        $palavras = explode(' ', $frase_original);
-        // Remove eventuais espaços duplicados vazios
-        $palavras = array_values(array_filter($palavras, function($p) {
-            return $p !== '';
-        }));
+                $palavras = explode(' ', $frase_original);
+                $palavras = array_values(array_filter($palavras, function($p) {
+                    return $p !== '';
+                }));
 
-        $frases_jogo[] = [
-            'id'             => (int) $linha['id'],
-            'frase_controle' => $frase_original,
-            'palavras'       => $palavras,
-            'id_tema'        => (int) ($linha['id_tema'] ?? $tema_ativo['id']),
-            'tema_nome'      => $linha['tema_nome'] ?? $tema_ativo['nome'],
-        ];
+                $frases_jogo[] = [
+                    'id'             => (int) $linha['id'],
+                    'frase_controle' => $frase_original,
+                    'palavras'       => $palavras,
+                    'id_tema'        => (int) ($linha['id_tema'] ?? $tema_ativo['id']),
+                    'tema_nome'      => $linha['tema_nome'] ?? $tema_ativo['nome'],
+                ];
+            }
+        }
+        $stmt_frases->close();
     }
-    $stmt_frases->close();
 }
 
 // Randomiza a ordem das frases na partida
@@ -129,15 +134,15 @@ shuffle($frases_jogo);
 
 $total_frases = count($frases_jogo);
 
-/* Serializar para o JavaScript de forma segura */
-$frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+// Serialização segura para o JavaScript
+$frases_json = json_encode($frases_jogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?: '[]';
 
-// Carrega dinamicamente os balões de cores disponíveis na pasta baloes/cores
-$baloes_cores_arquivos = glob('baloes/cores/*.gif');
+// Carrega os balões de cores disponíveis na pasta baloes/cores usando __DIR__ absoluto seguro
+$baloes_cores_arquivos = glob(__DIR__ . '/baloes/cores/*.gif');
 $baloes_cores = [];
 if (!empty($baloes_cores_arquivos)) {
     foreach ($baloes_cores_arquivos as $arq) {
-        $baloes_cores[] = str_replace('\\', '/', $arq);
+        $baloes_cores[] = 'baloes/cores/' . basename($arq);
     }
 }
 if (empty($baloes_cores)) {
@@ -149,7 +154,7 @@ if (empty($baloes_cores)) {
         'baloes/cores/balao_vermelho.gif',
     ];
 }
-$baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
+$baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -173,6 +178,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                         'papel-branco':     '#FFFFFF',
                         'papel-claro':      '#F8FAF6',
                         'papel-linhas':     '#E2E8F0',
+                        'papelao-fundo':    '#c6a175',
                         'tinta-escura':     '#0F172A',
                         'verde-vibrante':   '#00C853',
                         'verde-escuro':     '#054D20',
@@ -201,6 +207,8 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
 
     <!-- CSS do jogo de balões -->
     <link rel="stylesheet" href="css/jogo_baloes.css">
+    <!-- CSS de Acessibilidade & Modo Escuro -->
+    <link rel="stylesheet" href="css/acessibilidade.css">
 </head>
 <body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
 
@@ -251,7 +259,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
             <?php if ($tema_ativo): ?>
             <div id="badge-tema-ativo"
                  class="flex items-center gap-2.5 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
-                <span class="text-lg">🎈</span>
+                <span class="inline-block w-3 h-3 bg-laranja-vibrante border-2 border-tinta-escura rounded-sm"></span>
                 <div>
                     <span class="block text-[10px] font-black text-azul-escuro uppercase tracking-wider font-bingo">TOPIC</span>
                     <span class="block font-bingo text-sm font-extrabold text-tinta-escura uppercase leading-none">
@@ -264,7 +272,9 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
             <!-- Placar -->
             <div id="placar-jogo"
                  class="flex items-center gap-3 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
-                <span class="text-xl">⭐</span>
+                <div class="w-7 h-7 bg-amarelo-vibrante border border-tinta-escura rounded-lg flex items-center justify-center font-bold text-xs">
+                    PTS
+                </div>
                 <div>
                     <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider font-bingo">SCORE</span>
                     <span id="texto-placar"
@@ -284,11 +294,11 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                     POP THE BALLOONS!
                 </h1>
                 <p class="font-bingo text-base sm:text-lg font-extrabold text-gray-700 tracking-wide mt-1">
-                    Pop the balloons in the correct order to build the sentence! 🎈
+                    Pop the balloons in the correct order to build the sentence!
                 </p>
             </div>
 
-            <!-- SELETOR DE TEMAS RÁPIDO (se houver mais de um) -->
+            <!-- SELETOR DE TEMAS RÁPIDO -->
             <?php if (count($temas_disponiveis) > 1): ?>
             <div id="seletor-temas" class="flex flex-wrap items-center justify-center gap-2 -mt-1">
                 <span class="font-bingo font-black text-xs text-gray-500 uppercase tracking-widest mr-1">TOPICS:</span>
@@ -355,7 +365,9 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
             <?php else: ?>
             <!-- Nenhuma frase encontrada no banco -->
             <div class="text-center py-12">
-                <p class="text-6xl mb-4">🎈</p>
+                <div class="w-16 h-16 mx-auto mb-4 bg-papel-claro border-2 border-tinta-escura rounded-2xl flex items-center justify-center font-bold text-xl text-gray-500">
+                    0
+                </div>
                 <p class="font-bingo font-bold text-2xl text-gray-700">
                     No sentences found for this topic.<br>
                     Please add sentences in the Frases table!
@@ -363,7 +375,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                 <a href="temas_baloes.php"
                    class="botao-acao mt-6 bg-azul-vibrante text-white inline-flex"
                    style="text-decoration: none;">
-                    ← Back to Topics
+                    Back to Topics
                 </a>
             </div>
             <?php endif; ?>
@@ -387,7 +399,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
     <!-- OVERLAY DE FINAL DE JOGO -->
     <div id="overlay-resultado" role="dialog" aria-modal="true" aria-label="Game complete">
         <div class="card-resultado card-resultado-animando">
-            <div class="text-6xl mb-3">🎉🎈⭐</div>
+            <div class="text-3xl font-gooddog text-verde-vibrante font-bold mb-2">COMPLETE!</div>
             <h2 class="font-gooddog text-5xl font-bold text-tinta-escura leading-tight">
                 CONGRATULATIONS!
             </h2>
@@ -402,6 +414,7 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                 <span id="score-final" class="font-gooddog text-5xl font-bold text-verde-vibrante">
                     <?= $total_frases ?> / <?= $total_frases ?>
                 </span>
+                <div id="info-pontuacao-baloes" class="mt-2 pt-2 border-t-2 border-dashed border-gray-300"></div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -418,7 +431,6 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                    class="botao-acao bg-amarelo-vibrante text-tinta-escura w-full sm:w-auto"
                    style="text-decoration:none;">
                     <span>OTHER TOPICS</span>
-                    <span>🎈</span>
                 </a>
 
                 <a href="index.php"
@@ -433,20 +445,14 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
         </div>
     </div>
 
-    <!-- ============================================================
-         JAVASCRIPT DO JOGO DOS BALÕES
-         ============================================================ -->
+    <!-- JAVASCRIPT DO JOGO DOS BALÕES -->
     <script>
     (function() {
         'use strict';
 
-        // 1. Dados das frases recebidas do PHP (já processadas com explode)
         const frasesData = <?= $frases_json ?: '[]' ?>;
-        const totalFrases = frasesData.length;
+        const totalFrases = Array.isArray(frasesData) ? frasesData.length : 0;
 
-        if (totalFrases === 0) return;
-
-        // 2. Elementos da Interface
         const areaBaloes        = document.getElementById('area-baloes');
         const fraseConstrucao   = document.getElementById('frase-construcao');
         const boxFraseCorreta   = document.getElementById('box-frase-correta');
@@ -459,38 +465,39 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
         const overlayResultado  = document.getElementById('overlay-resultado');
         const btnJogarNovamente = document.getElementById('btn-jogar-novamente');
 
-        // 3. Estados do Jogo
         let indiceFraseAtual = 0;
         let acertos = 0;
-        let palavrasSelecionadas = []; // palavras na ordem em que o usuário clicou
+        let palavrasSelecionadas = [];
         let estaValidando = false;
 
-        // 4. Balões Coloridos e Animação de Explosão (Pop)
         const GIF_POP = 'baloes/pop.gif';
         const baloesCoresDisponiveis = <?= $baloes_cores_json ?>;
 
-        // Pré-carregamento dos GIFs das cores e do pop.gif para resposta instantânea ao clique
-        [GIF_POP, ...baloesCoresDisponiveis].forEach(src => {
+        [GIF_POP, ...(Array.isArray(baloesCoresDisponiveis) ? baloesCoresDisponiveis : [])].forEach(src => {
             const img = new Image();
             img.src = src;
         });
 
-        // 5. Iniciar o Jogo
-        carregarFrase(indiceFraseAtual);
+        if (btnDesfazer) {
+            btnDesfazer.addEventListener('click', () => {
+                if (estaValidando) return;
+                reiniciarFraseAtual();
+            });
+        }
 
-        btnDesfazer.addEventListener('click', () => {
-            if (estaValidando) return;
-            reiniciarFraseAtual();
-        });
+        if (btnJogarNovamente) {
+            btnJogarNovamente.addEventListener('click', () => {
+                if (overlayResultado) overlayResultado.classList.remove('ativo');
+                indiceFraseAtual = 0;
+                acertos = 0;
+                if (totalFrases > 0) carregarFrase(0);
+            });
+        }
 
-        btnJogarNovamente.addEventListener('click', () => {
-            overlayResultado.classList.remove('ativo');
-            indiceFraseAtual = 0;
-            acertos = 0;
-            carregarFrase(0);
-        });
+        if (totalFrases > 0) {
+            carregarFrase(indiceFraseAtual);
+        }
 
-        // 6. Carregar Frase da Rodada
         function carregarFrase(indice) {
             if (indice >= totalFrases) {
                 finalizarJogo();
@@ -499,22 +506,20 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
 
             estaValidando = false;
             palavrasSelecionadas = [];
-            areaFeedback.innerHTML = '';
+            if (areaFeedback) areaFeedback.innerHTML = '';
             if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
             atualizarProgresso();
 
             const fraseObj = frasesData[indice];
-            const palavrasOriginais = fraseObj.palavras; // geradas pelo explode do PHP
+            if (!fraseObj) return;
+            const palavrasOriginais = Array.isArray(fraseObj.palavras) ? fraseObj.palavras : [];
 
-            // Renderiza os slots da frase em construção
             renderizarSlots(palavrasOriginais.length);
-
-            // Renderiza os balões na tela com as palavras embaralhadas
             renderizarBaloes(palavrasOriginais);
         }
 
-        // 7. Renderizar Slots Vazios na Frase
         function renderizarSlots(qtd) {
+            if (!fraseConstrucao) return;
             fraseConstrucao.innerHTML = '<span class="frase-construcao-label">Sentence Builder</span>';
             for (let i = 0; i < qtd; i++) {
                 const slot = document.createElement('div');
@@ -525,209 +530,121 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
             }
         }
 
-        // 8. Renderizar Balões Espalhados pela Área Azul
         function renderizarBaloes(palavras) {
+            if (!areaBaloes) return;
             areaBaloes.innerHTML = '';
 
-            // Cria uma cópia com id para cada palavra e embaralha
-            const listaPalavras = palavras.map((p, idx) => ({
-                id: `p-${idx}-${Date.now()}`,
+            const palavrasEmbaralhadas = [...palavras].map((p, idxOriginal) => ({
                 texto: p,
-                indiceOriginal: idx
+                idxOriginal: idxOriginal
             }));
 
-            // Algoritmo Fisher-Yates de embaralhamento
-            for (let i = listaPalavras.length - 1; i > 0; i--) {
+            for (let i = palavrasEmbaralhadas.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [listaPalavras[i], listaPalavras[j]] = [listaPalavras[j], listaPalavras[i]];
+                [palavrasEmbaralhadas[i], palavrasEmbaralhadas[j]] = [palavrasEmbaralhadas[j], palavrasEmbaralhadas[i]];
             }
 
-            const total = listaPalavras.length;
-            const containerWidth = areaBaloes.clientWidth || 850;
-            const containerHeight = areaBaloes.clientHeight || 540;
+            const total = palavrasEmbaralhadas.length;
+            const posicoes = calcularPosicoesBaloes(total);
 
-            const isMobile = window.innerWidth <= 640;
-            const balaoLargura = isMobile ? 125 : 165;
-            const balaoAltura  = isMobile ? 152 : 198;
+            palavrasEmbaralhadas.forEach((item, index) => {
+                const pos = posicoes[index] || { left: 15 + index * 15, top: 20 };
+                const corGif = baloesCoresDisponiveis[index % baloesCoresDisponiveis.length] || 'baloes/cores/balao_amarelo.gif';
 
-            // Margens de segurança estritas (impedem qualquer sobreposição física ou de flutuação)
-            const BORDA_X = isMobile ? 18 : 32;
-            const BORDA_Y = isMobile ? 16 : 24;
-
-            // Gera slots espaciais garantidos por geometria
-            const slotsDisponiveis = [];
-
-            if (total <= 3) {
-                // Linha única com espaçamento horizontal máximo e desnível suave
-                const espacoUtil = containerWidth - (2 * BORDA_X);
-                const stepX = (espacoUtil - balaoLargura) / Math.max(total - 1, 1);
-                const baseY = (containerHeight - balaoAltura) / 2;
-
-                for (let i = 0; i < total; i++) {
-                    const posX = (total === 1)
-                        ? (containerWidth - balaoLargura) / 2
-                        : BORDA_X + (i * stepX);
-                    const desnível = (i % 2 === 0 ? -18 : 18);
-                    const posY = Math.max(BORDA_Y, Math.min(containerHeight - balaoAltura - BORDA_Y, baseY + desnível));
-
-                    slotsDisponiveis.push({ x: posX, y: posY });
-                }
-            } else if (total === 4) {
-                // 2 Colunas x 2 Linhas: ampla margem horizontal e vertical
-                const topY    = BORDA_Y + 12;
-                const bottomY = containerHeight - balaoAltura - BORDA_Y - 12;
-
-                const col0X = BORDA_X + (containerWidth * 0.12);
-                const col1X = containerWidth - balaoLargura - BORDA_X - (containerWidth * 0.12);
-
-                slotsDisponiveis.push(
-                    { x: col0X, y: topY },
-                    { x: col1X, y: topY },
-                    { x: col0X + 24, y: bottomY },
-                    { x: col1X - 24, y: bottomY }
-                );
-            } else if (total === 5) {
-                // Padrão Quinconce: 3 balões no topo e 2 balões nos vãos de baixo (nunca colidem!)
-                const topY    = BORDA_Y + 10;
-                const bottomY = containerHeight - balaoAltura - BORDA_Y - 10;
-
-                const stepTopX = (containerWidth - (2 * BORDA_X) - balaoLargura) / 2;
-                const x0 = BORDA_X;
-                const x1 = BORDA_X + stepTopX;
-                const x2 = containerWidth - balaoLargura - BORDA_X;
-
-                // Os 2 balões de baixo ficam exatamente nos vãos intermediários
-                const x3 = (x0 + x1) / 2;
-                const x4 = (x1 + x2) / 2;
-
-                slotsDisponiveis.push(
-                    { x: x0, y: topY },
-                    { x: x1, y: topY - 6 },
-                    { x: x2, y: topY },
-                    { x: x3, y: bottomY },
-                    { x: x4, y: bottomY }
-                );
-            } else {
-                // 6 ou mais balões: 2 linhas bem separadas no topo e no fundo
-                const topY    = BORDA_Y + 8;
-                const bottomY = containerHeight - balaoAltura - BORDA_Y - 8;
-                const cols = Math.ceil(total / 2);
-                const stepX = (containerWidth - (2 * BORDA_X) - balaoLargura) / (cols - 1);
-
-                for (let i = 0; i < cols; i++) {
-                    slotsDisponiveis.push({ x: BORDA_X + (i * stepX), y: topY });
-                }
-                for (let i = 0; i < (total - cols); i++) {
-                    const offsetMeio = (cols > 2) ? stepX / 2 : 0;
-                    slotsDisponiveis.push({ x: BORDA_X + offsetMeio + (i * stepX), y: bottomY });
-                }
-            }
-
-            // Embaralha a atribuição de slots para manter o jogo dinâmico e lúdico
-            const slotsSorteados = [...slotsDisponiveis];
-            for (let i = slotsSorteados.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [slotsSorteados[i], slotsSorteados[j]] = [slotsSorteados[j], slotsSorteados[i]];
-            }
-
-            // Redistribuição randômica das cores dos balões (embaralha a paleta de cores para cada rodada)
-            const coresEmbaralhadas = [...baloesCoresDisponiveis];
-            for (let i = coresEmbaralhadas.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [coresEmbaralhadas[i], coresEmbaralhadas[j]] = [coresEmbaralhadas[j], coresEmbaralhadas[i]];
-            }
-
-            listaPalavras.forEach((item, index) => {
                 const balao = document.createElement('div');
-                const animacaoClasse = `balao-flutuar-${(index % 3) + 1}`;
-                balao.className = `balao-container ${animacaoClasse}`;
-                balao.dataset.palavra = item.texto;
-                balao.dataset.id = item.id;
+                balao.className = 'balao-item balao-animando';
+                balao.id = `balao-${index}`;
+                balao.style.left = `${pos.left}%`;
+                balao.style.top  = `${pos.top}%`;
 
-                // Atribui uma cor da paleta embaralhada garantindo diversidade visual entre os balões
-                const corEscolhida = coresEmbaralhadas[index % coresEmbaralhadas.length];
+                const animDuracao = (2.4 + (index % 3) * 0.4).toFixed(1);
+                const animDelay   = (index * 0.25).toFixed(2);
+                balao.style.animation = `balaoFlutuandoSuave ${animDuracao}s ease-in-out ${animDelay}s infinite alternate`;
 
-                // Posição com margem garantida
-                const slot = slotsSorteados[index % slotsSorteados.length];
-                const posX = Math.max(BORDA_X, Math.min(containerWidth - balaoLargura - BORDA_X, Math.round(slot.x)));
-                const posY = Math.max(BORDA_Y, Math.min(containerHeight - balaoAltura - BORDA_Y, Math.round(slot.y)));
-
-                balao.style.left = `${posX}px`;
-                balao.style.top = `${posY}px`;
-
-                // Variação orgânica de flutuação e rotação
-                const duracaoFlutuar = (2.8 + Math.random() * 1.4).toFixed(2);
-                const delayFlutuar = -(Math.random() * 2.5).toFixed(2);
-                const rotacaoInicial = (Math.random() * 6 - 3).toFixed(1);
-                balao.style.animationDuration = `${duracaoFlutuar}s`;
-                balao.style.animationDelay = `${delayFlutuar}s`;
-                balao.style.transform = `rotate(${rotacaoInicial}deg)`;
-
-                // Imagem do balão colorido em GIF (o arquivo GIF já possui animação de oscilação contínua)
                 const img = document.createElement('img');
-                img.src = corEscolhida;
+                img.src = corGif;
+                img.alt = 'Balão colorido';
                 img.className = 'balao-img';
-                img.alt = `Balloon with word ${item.texto}`;
                 img.draggable = false;
 
-                // Texto ampliado sobreposto ao balão com ajuste de escala para visibilidade total
-                const spanPalavra = document.createElement('span');
-                spanPalavra.className = 'balao-palavra';
-                spanPalavra.textContent = item.texto;
+                const textoSpan = document.createElement('span');
+                textoSpan.className = 'balao-texto';
+                textoSpan.textContent = item.texto;
 
-                // Ajuste proporcional do tamanho da fonte para palavras longas nunca cortarem
-                const len = item.texto.length;
-                if (len >= 8) {
-                    spanPalavra.style.fontSize = isMobile ? '0.95rem' : '1.3rem';
-                } else if (len >= 6) {
-                    spanPalavra.style.fontSize = isMobile ? '1.1rem' : '1.45rem';
-                } else {
-                    spanPalavra.style.fontSize = isMobile ? '1.25rem' : '1.65rem';
+                if (item.texto.length > 7) {
+                    textoSpan.style.fontSize = '1.05rem';
+                } else if (item.texto.length > 5) {
+                    textoSpan.style.fontSize = '1.25rem';
                 }
 
                 balao.appendChild(img);
-                balao.appendChild(spanPalavra);
+                balao.appendChild(textoSpan);
 
-                // Evento de clique para estourar o balão
                 balao.addEventListener('click', () => {
-                    if (estaValidando || balao.classList.contains('balao-explodindo')) return;
-                    estourarBalao(balao, img, spanPalavra, item.texto);
+                    if (estaValidando) return;
+                    if (balao.classList.contains('balao-estourado')) return;
+                    estourarBalao(balao, img, item.texto);
                 });
 
                 areaBaloes.appendChild(balao);
             });
         }
 
-        // 9. Ação de Estourar o Balão (Pop com pop.gif)
-        function estourarBalao(balao, img, spanPalavra, palavra) {
-            balao.classList.add('balao-explodindo');
+        function calcularPosicoesBaloes(qtd) {
+            const layouts = {
+                1: [{ left: 50, top: 40 }],
+                2: [{ left: 32, top: 40 }, { left: 68, top: 40 }],
+                3: [{ left: 22, top: 42 }, { left: 50, top: 38 }, { left: 78, top: 42 }],
+                4: [
+                    { left: 28, top: 24 }, { left: 72, top: 24 },
+                    { left: 28, top: 62 }, { left: 72, top: 62 }
+                ],
+                5: [
+                    { left: 20, top: 22 }, { left: 50, top: 18 }, { left: 80, top: 22 },
+                    { left: 35, top: 62 }, { left: 65, top: 62 }
+                ],
+                6: [
+                    { left: 20, top: 22 }, { left: 50, top: 20 }, { left: 80, top: 22 },
+                    { left: 20, top: 62 }, { left: 50, top: 64 }, { left: 80, top: 62 }
+                ]
+            };
 
-            // Esconde o texto da palavra imediatamente para evidenciar a explosão
-            spanPalavra.style.display = 'none';
+            if (layouts[qtd]) return layouts[qtd];
 
-            // Adiciona a palavra na frase em construção
+            const coords = [];
+            for (let i = 0; i < qtd; i++) {
+                coords.push({
+                    left: 15 + ((i % 4) * 22),
+                    top:  i < 4 ? 22 : 62
+                });
+            }
+            return coords;
+        }
+
+        function estourarBalao(balaoEl, imgEl, palavra) {
+            balaoEl.classList.add('balao-estourado');
+            balaoEl.style.animation = 'none';
+
+            imgEl.src = `${GIF_POP}?t=${Date.now()}`;
+
+            const textoEl = balaoEl.querySelector('.balao-texto');
+            if (textoEl) {
+                textoEl.style.opacity = '0';
+                textoEl.style.transform = 'translate(-50%, -50%) scale(1.4)';
+            }
+
             const slotIdx = palavrasSelecionadas.length;
             palavrasSelecionadas.push(palavra);
             preencherSlot(slotIdx, palavra);
 
-            // Troca para o GIF de explosão com timestamp para forçar reinício da animação a partir do frame 0
-            img.src = `${GIF_POP}?t=${Date.now()}`;
-
-            // Aguarda o ciclo de 9 frames do pop.gif (~500ms) para sumir suavemente
             setTimeout(() => {
-                balao.classList.add('balao-sumindo');
-                setTimeout(() => {
-                    if (balao.parentNode) {
-                        balao.parentNode.removeChild(balao);
-                    }
-                }, 250);
+                balaoEl.style.opacity = '0';
+                balaoEl.style.pointerEvents = 'none';
+            }, 480);
 
-                // Verifica se todas as palavras foram selecionadas
-                verificarConclusaoRodada();
-            }, 500);
+            verificarConclusaoRodada();
         }
 
-        // 10. Preencher Slot na Frase em Construção
         function preencherSlot(slotIdx, palavra) {
             const slot = document.getElementById(`slot-${slotIdx}`);
             if (slot) {
@@ -736,32 +653,31 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
             }
         }
 
-        // 11. Verificar Conclusão da Rodada
         function verificarConclusaoRodada() {
             const fraseObj = frasesData[indiceFraseAtual];
+            if (!fraseObj || !Array.isArray(fraseObj.palavras)) return;
             const totalPalavras = fraseObj.palavras.length;
 
             if (palavrasSelecionadas.length < totalPalavras) {
-                return; // ainda restam balões
+                return;
             }
 
-            // Todas as palavras foram selecionadas! Compara com a frase de controle
             estaValidando = true;
 
             const fraseMontada = palavrasSelecionadas.join(' ').trim().toLowerCase();
-            const fraseEsperada = fraseObj.frase_controle.trim().toLowerCase();
+            const fraseEsperada = String(fraseObj.frase_controle || '').trim().toLowerCase();
 
             if (fraseMontada === fraseEsperada) {
-                // ACERTOU!
                 acertos++;
                 if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
-                areaFeedback.innerHTML = `
-                    <span class="feedback-acerto flex items-center justify-center gap-2">
-                        <span>⭐ EXCELLENT! YOU BUILT THE SENTENCE! ⭐</span>
-                    </span>
-                `;
+                if (areaFeedback) {
+                    areaFeedback.innerHTML = `
+                        <span class="feedback-acerto flex items-center justify-center gap-2">
+                            <span>EXCELLENT! YOU BUILT THE SENTENCE!</span>
+                        </span>
+                    `;
+                }
 
-                // Destaca slots como sucesso
                 for (let i = 0; i < totalPalavras; i++) {
                     const slot = document.getElementById(`slot-${i}`);
                     if (slot) {
@@ -773,14 +689,12 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
 
                 atualizarProgresso();
 
-                // Aguarda 1.4s e avança para a próxima frase
                 setTimeout(() => {
                     indiceFraseAtual++;
                     carregarFrase(indiceFraseAtual);
                 }, 1400);
 
             } else {
-                // ERROU! Destaca os slots da frase errada em vermelho
                 for (let i = 0; i < totalPalavras; i++) {
                     const slot = document.getElementById(`slot-${i}`);
                     if (slot) {
@@ -788,96 +702,94 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES);
                     }
                 }
 
-                // Exibe a frase certa abaixo da frase errada
                 if (boxFraseCorreta) {
                     boxFraseCorreta.innerHTML = `
                         <div class="card-correcao w-full max-w-xl text-center">
                             <span class="card-correcao-tag">
-                                <span>💡 CORRECT SENTENCE:</span>
+                                <span>CORRECT SENTENCE:</span>
                             </span>
                             <div class="card-correcao-frase">
                                 "${fraseObj.frase_controle}"
                             </div>
-                            <button type="button" id="btn-tentar-agora" class="mt-2 bg-verde-vibrante text-white text-xs font-bingo font-extrabold px-3.5 py-1.5 rounded-xl border-2 border-tinta-escura shadow-sm hover:scale-105 transition-transform flex items-center gap-1.5 cursor-pointer">
-                                <span>TRY AGAIN NOW</span>
-                                <span>🔄</span>
-                            </button>
                         </div>
                     `;
                 }
 
-                areaFeedback.innerHTML = `
-                    <span class="feedback-erro flex items-center justify-center gap-2">
-                        <span>❌ OOPS! TAKE A LOOK AT THE CORRECT SENTENCE! 🔄</span>
-                    </span>
-                `;
-
-                // Efeito visual de tremor na frase errada
-                fraseConstrucao.classList.add('animate-bounce');
-
-                let resetTimer = null;
-                const executarReset = () => {
-                    if (resetTimer) {
-                        clearTimeout(resetTimer);
-                        resetTimer = null;
-                    }
-                    fraseConstrucao.classList.remove('animate-bounce');
-                    if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
-                    reiniciarFraseAtual();
-                };
-
-                const btnTentar = document.getElementById('btn-tentar-agora');
-                if (btnTentar) {
-                    btnTentar.addEventListener('click', executarReset);
+                if (areaFeedback) {
+                    areaFeedback.innerHTML = `
+                        <span class="feedback-erro flex items-center justify-center gap-2">
+                            <span>OOPS! TRY AGAIN!</span>
+                        </span>
+                    `;
                 }
 
-                // Dá 3.8s para a criança ler a frase certa confortavelmente antes de reiniciar
-                resetTimer = setTimeout(executarReset, 3800);
+                setTimeout(() => {
+                    reiniciarFraseAtual();
+                }, 2800);
             }
         }
 
-        // 12. Reiniciar Frase Atual (em caso de erro ou botão Reset)
         function reiniciarFraseAtual() {
-            palavrasSelecionadas = [];
             estaValidando = false;
-            areaFeedback.innerHTML = '';
+            palavrasSelecionadas = [];
+            if (areaFeedback) areaFeedback.innerHTML = '';
             if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
+
             const fraseObj = frasesData[indiceFraseAtual];
-            renderizarSlots(fraseObj.palavras.length);
-            renderizarBaloes(fraseObj.palavras);
+            if (!fraseObj) return;
+            const palavrasOriginais = Array.isArray(fraseObj.palavras) ? fraseObj.palavras : [];
+
+            renderizarSlots(palavrasOriginais.length);
+            renderizarBaloes(palavrasOriginais);
         }
 
-        // 13. Atualizar Barra de Progresso e Placar
         function atualizarProgresso() {
-            textoPlacar.textContent = `${acertos} / ${totalFrases}`;
-            labelProgresso.textContent = `Sentence ${Math.min(indiceFraseAtual + 1, totalFrases)} of ${totalFrases}`;
+            if (!totalFrases) return;
+            const respondidas = indiceFraseAtual;
+            const pct = Math.round((respondidas / totalFrases) * 100);
 
-            const percent = Math.round((indiceFraseAtual / totalFrases) * 100);
-            labelPorcentagem.textContent = `${percent}%`;
-            barraInterna.style.width = `${percent}%`;
+            if (labelProgresso)   labelProgresso.textContent   = `Sentence ${indiceFraseAtual + 1} of ${totalFrases}`;
+            if (labelPorcentagem) labelPorcentagem.textContent = `${pct}%`;
+            if (barraInterna)     barraInterna.style.width     = `${pct}%`;
+            if (textoPlacar)      textoPlacar.textContent      = `${acertos} / ${totalFrases}`;
         }
 
-        // 14. Finalizar Jogo (Overlay de Vitória)
         function finalizarJogo() {
-            textoPlacar.textContent = `${acertos} / ${totalFrases}`;
-            barraInterna.style.width = '100%';
-            labelPorcentagem.textContent = '100%';
+            if (!overlayResultado) return;
+            const scoreFinal = document.getElementById('score-final');
+            if (scoreFinal) {
+                scoreFinal.textContent = `${acertos} / ${totalFrases}`;
+            }
 
-            document.getElementById('score-final').textContent = `${acertos} / ${totalFrases}`;
+            if (labelProgresso)   labelProgresso.textContent   = `Completed! ${totalFrases} of ${totalFrases}`;
+            if (labelPorcentagem) labelPorcentagem.textContent = '100%';
+            if (barraInterna)     barraInterna.style.width     = '100%';
+
+            // Salva estatísticas e pontuação calculada no backend (acertos*100 - erros*65)
+            fetch('salvar_pontuacao.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ questoesRespondidas: totalFrases, acertos: acertos })
+            }).then(r => r.json()).then(data => {
+                const elInfo = document.getElementById('info-pontuacao-baloes');
+                if (elInfo && data && data.sucesso) {
+                    const sinal = data.pontuacao_partida > 0 ? '+' : '';
+                    elInfo.innerHTML = `
+                        <span class="block text-xs font-black text-verde-escuro uppercase tracking-wider font-bingo">PONTOS GANHOS</span>
+                        <span class="font-gooddog text-3xl font-bold text-verde-vibrante">${sinal}${data.pontuacao_partida} pts</span>
+                        <span class="block text-xs font-bold text-gray-500 font-bingo mt-1">Pontuação Total: ${data.pontuacao_total} pts</span>
+                    `;
+                }
+            }).catch(err => console.error(err));
+
             overlayResultado.classList.add('ativo');
         }
 
-        // Ajustar posições dos balões se a tela for redimensionada
-        window.addEventListener('resize', () => {
-            if (!estaValidando && palavrasSelecionadas.length === 0) {
-                const fraseObj = frasesData[indiceFraseAtual];
-                if (fraseObj) {
-                    renderizarBaloes(fraseObj.palavras);
-                }
-            }
-        });
-
     })();
     </script>
+
+    <!-- Script de Acessibilidade & Modo Escuro -->
+    <script src="js/acessibilidade.js"></script>
+
 </body>
 </html>

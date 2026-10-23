@@ -2,98 +2,133 @@
 /* ============================================================
    jogo_ingles.php — Complete the Sentence! (Gap Fill Quiz)
    English for Kids — Fundamental 1
-   Schema: tccdb | Jogo → Pergunta → Conjunto de respostas erradas
+   Refatorado para total compatibilidade Linux / MySQL case-sensitive
    ============================================================ */
 
-   require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/proteger.php';
 
-   $id_jogo = 1;
+$id_jogo = 1;
 
-   // 1. Obter todos os temas disponíveis para o jogo de inglês
-   $sql_temas = "
-       SELECT
-           t.`id`,
-           t.`nome`,
-           COUNT(p.`id`) AS total_perguntas
-       FROM `Tema` t
-       LEFT JOIN `Pergunta` p ON p.`id_tema` = t.`id`
-       WHERE t.`id_jogo` = ? OR t.`id_jogo` IS NULL
-       GROUP BY t.`id`, t.`nome`
-       ORDER BY t.`id` ASC
-   ";
-   $stmt_temas = $conn->prepare($sql_temas);
-   $stmt_temas->bind_param("i", $id_jogo);
-   $stmt_temas->execute();
-   $res_temas = $stmt_temas->get_result();
+// Resolução dinâmica do nome real das tabelas (Linux case-sensitivity)
+$tbl_tema      = db_table($conn, 'Tema');
+$tbl_pergunta  = db_table($conn, 'Pergunta');
+$tbl_conjunto  = db_table($conn, 'Conjunto de respostas erradas');
 
-   $temas_disponiveis = [];
-   while ($t = $res_temas->fetch_assoc()) {
-       $temas_disponiveis[] = [
-           'id'              => (int) $t['id'],
-           'nome'            => $t['nome'],
-           'total_perguntas' => (int) $t['total_perguntas'],
-       ];
-   }
-   $stmt_temas->close();
+// 1. Obter todos os temas disponíveis para o jogo de inglês
+$temas_disponiveis = [];
+$sql_temas = "
+    SELECT
+        t.`id`,
+        t.`nome`,
+        COUNT(p.`id`) AS total_perguntas
+    FROM {$tbl_tema} t
+    LEFT JOIN {$tbl_pergunta} p ON p.`id_tema` = t.`id`
+    WHERE t.`id_jogo` = ? OR t.`id_jogo` IS NULL
+    GROUP BY t.`id`, t.`nome`
+    ORDER BY t.`id` ASC
+";
+$stmt_temas = $conn->prepare($sql_temas);
+if ($stmt_temas) {
+    $stmt_temas->bind_param("i", $id_jogo);
+    $stmt_temas->execute();
+    $res_temas = $stmt_temas->get_result();
+    if ($res_temas) {
+        while ($t = $res_temas->fetch_assoc()) {
+            $temas_disponiveis[] = [
+                'id'              => (int) $t['id'],
+                'nome'            => $t['nome'],
+                'total_perguntas' => (int) $t['total_perguntas'],
+            ];
+        }
+    }
+    $stmt_temas->close();
+}
 
-   // 2. Determinar o tema selecionado via GET (aceita id_tema numérico ou nome do tema)
-   $tema_param = $_GET['tema'] ?? $_GET['id_tema'] ?? null;
-   $tema_ativo = null;
+// Fallback de segurança: busca temas que possuam perguntas vinculadas caso id_jogo esteja nulo
+if (empty($temas_disponiveis)) {
+    $sql_fb = "
+        SELECT
+            t.`id`,
+            t.`nome`,
+            COUNT(p.`id`) AS total_perguntas
+        FROM {$tbl_tema} t
+        INNER JOIN {$tbl_pergunta} p ON p.`id_tema` = t.`id`
+        GROUP BY t.`id`, t.`nome`
+        ORDER BY t.`id` ASC
+    ";
+    $res_fb = $conn->query($sql_fb);
+    if ($res_fb) {
+        while ($t = $res_fb->fetch_assoc()) {
+            $temas_disponiveis[] = [
+                'id'              => (int) $t['id'],
+                'nome'            => $t['nome'],
+                'total_perguntas' => (int) $t['total_perguntas'],
+            ];
+        }
+    }
+}
 
-   if (!empty($temas_disponiveis)) {
-       if ($tema_param !== null && $tema_param !== '') {
-           foreach ($temas_disponiveis as $t) {
-               if ((string) $t['id'] === (string) $tema_param || strcasecmp($t['nome'], (string) $tema_param) === 0) {
-                   $tema_ativo = $t;
-                   break;
-               }
-           }
-       }
+// 2. Determinar o tema selecionado via GET
+$tema_param = $_GET['tema'] ?? $_GET['id_tema'] ?? null;
+$tema_ativo = null;
 
-       // Se nenhum tema foi especificado ou encontrado, usa o primeiro tema
-       if (!$tema_ativo) {
-           $tema_ativo = $temas_disponiveis[0];
-       }
-   }
+if (!empty($temas_disponiveis)) {
+    if ($tema_param !== null && $tema_param !== '') {
+        foreach ($temas_disponiveis as $t) {
+            if ((string) $t['id'] === (string) $tema_param || strcasecmp($t['nome'], (string) $tema_param) === 0) {
+                $tema_ativo = $t;
+                break;
+            }
+        }
+    }
 
-   // 3. Buscar as perguntas do tema selecionado usando SELECT * em Pergunta
-   $perguntas = [];
-   if ($tema_ativo) {
-       $sql_perguntas = "
-           SELECT
-               p.*,
-               t.`nome` AS tema_nome,
-               c.`conjunto`
-           FROM `Pergunta` p
-           INNER JOIN `Tema` t ON t.`id` = p.`id_tema`
-           LEFT JOIN `Conjunto de respostas erradas` c ON c.`Pergunta_id` = p.`id`
-           WHERE p.`id_tema` = ?
-           ORDER BY p.`id` ASC
-       ";
-       $stmt_perguntas = $conn->prepare($sql_perguntas);
-       $stmt_perguntas->bind_param("i", $tema_ativo['id']);
-       $stmt_perguntas->execute();
-       $res_perguntas = $stmt_perguntas->get_result();
+    if (!$tema_ativo) {
+        $tema_ativo = $temas_disponiveis[0];
+    }
+}
 
-       while ($linha = $res_perguntas->fetch_assoc()) {
-           $perguntas[] = [
-               'id'             => (int) $linha['id'],
-               'primeira_parte' => $linha['primeira parte'] ?? $linha['primeira_parte'] ?? '',
-               'resposta'       => $linha['resposta'],
-               'segunda_parte'  => $linha['segunda parte'] ?? $linha['segunda_parte'] ?? '',
-               'id_tema'        => (int) ($linha['id_tema'] ?? 0),
-               'tema_nome'      => $linha['tema_nome'] ?? '',
-               'erradas'        => json_decode($linha['conjunto'] ?? '[]', true) ?: [],
-           ];
-       }
-       $stmt_perguntas->close();
-   }
+// 3. Buscar as perguntas do tema selecionado
+$perguntas = [];
+if ($tema_ativo) {
+    $sql_perguntas = "
+        SELECT
+            p.*,
+            t.`nome` AS tema_nome,
+            c.`conjunto`
+        FROM {$tbl_pergunta} p
+        INNER JOIN {$tbl_tema} t ON t.`id` = p.`id_tema`
+        LEFT JOIN {$tbl_conjunto} c ON (c.`Pergunta_id` = p.`id` OR c.`pergunta_id` = p.`id`)
+        WHERE p.`id_tema` = ?
+        ORDER BY p.`id` ASC
+    ";
+    $stmt_perguntas = $conn->prepare($sql_perguntas);
+    if ($stmt_perguntas) {
+        $stmt_perguntas->bind_param("i", $tema_ativo['id']);
+        $stmt_perguntas->execute();
+        $res_perguntas = $stmt_perguntas->get_result();
 
-// Randomiza a ordem das perguntas a cada carregamento da página
+        if ($res_perguntas) {
+            while ($linha = $res_perguntas->fetch_assoc()) {
+                $perguntas[] = [
+                    'id'             => (int) $linha['id'],
+                    'primeira_parte' => $linha['primeira parte'] ?? $linha['primeira_parte'] ?? '',
+                    'resposta'       => $linha['resposta'] ?? '',
+                    'segunda_parte'  => $linha['segunda parte'] ?? $linha['segunda_parte'] ?? '',
+                    'id_tema'        => (int) ($linha['id_tema'] ?? 0),
+                    'tema_nome'      => $linha['tema_nome'] ?? '',
+                    'erradas'        => json_decode($linha['conjunto'] ?? '[]', true) ?: [],
+                ];
+            }
+        }
+        $stmt_perguntas->close();
+    }
+}
+
+// Randomiza a ordem das perguntas
 shuffle($perguntas);
 
-// Lista de fundos disponíveis para a lacuna (cores sortidas da pasta fundo_resposta_completar)
+// Lista de fundos disponíveis para a lacuna
 $fundos_disponiveis = [
     'fundo_resposta_completar/1.png',
     'fundo_resposta_completar/2.png',
@@ -104,7 +139,6 @@ $fundos_disponiveis = [
     'fundo_resposta_completar/7.png',
 ];
 
-// Atribui um fundo randomizado para cada pergunta, garantindo cores sortidas e alternadas entre frases
 $total_fundos = count($fundos_disponiveis);
 $ultimo_fundo_idx = -1;
 foreach ($perguntas as &$p) {
@@ -119,11 +153,11 @@ unset($p);
 
 $total_perguntas = count($perguntas);
 
-/* Serializar para o JavaScript de forma segura */
-$perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+// Serializar para o JavaScript com garantia de array JSON válido
+$perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?: '[]';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -173,6 +207,8 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
 
     <!-- CSS do jogo -->
     <link rel="stylesheet" href="css/jogo_ingles.css">
+    <!-- CSS de Acessibilidade & Modo Escuro -->
+    <link rel="stylesheet" href="css/acessibilidade.css">
 </head>
 <body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-between p-2 sm:p-4 md:p-6 relative">
 
@@ -223,7 +259,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
             <?php if ($tema_ativo): ?>
             <div id="badge-tema-ativo"
                  class="flex items-center gap-2.5 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
-                <span class="text-lg">🏷️</span>
+                <span class="inline-block w-3 h-3 bg-azul-vibrante border-2 border-tinta-escura rounded-sm"></span>
                 <div>
                     <span class="block text-[10px] font-black text-azul-escuro uppercase tracking-wider font-bingo">TOPIC</span>
                     <span class="block font-bingo text-sm font-extrabold text-tinta-escura uppercase leading-none">
@@ -236,7 +272,9 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
             <!-- Placar -->
             <div id="placar-jogo"
                  class="flex items-center gap-3 bg-papel-claro borda-tinta-escura rounded-2xl px-4 py-2 shadow-sombra-cartum-branca">
-                <span class="text-xl">⭐</span>
+                <div class="w-7 h-7 bg-amarelo-vibrante border border-tinta-escura rounded-lg flex items-center justify-center font-bold text-xs">
+                    PTS
+                </div>
                 <div>
                     <span class="block text-xs font-black text-verde-vibrante uppercase tracking-wider font-bingo">SCORE</span>
                     <span id="texto-placar"
@@ -256,11 +294,11 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                     COMPLETE THE SENTENCE!
                 </h1>
                 <p class="font-bingo text-base sm:text-lg font-extrabold text-gray-600 tracking-wide mt-1">
-                    Choose the correct word to fill the gap ✏️
+                    Choose the correct word to fill the gap
                 </p>
             </div>
 
-            <!-- SELETOR DE TEMAS (exibido quando houver mais de um tema disponível) -->
+            <!-- SELETOR DE TEMAS -->
             <?php if (count($temas_disponiveis) > 1): ?>
             <div id="seletor-temas" class="flex flex-wrap items-center justify-center gap-2 -mt-2">
                 <span class="font-bingo font-black text-xs text-gray-500 uppercase tracking-widest mr-1">TOPICS:</span>
@@ -324,7 +362,9 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
             <?php else: ?>
             <!-- Nenhuma pergunta disponível -->
             <div class="text-center py-12">
-                <p class="text-6xl mb-4">📭</p>
+                <div class="w-16 h-16 mx-auto mb-4 bg-papel-claro border-2 border-tinta-escura rounded-2xl flex items-center justify-center font-bold text-xl text-gray-500">
+                    0
+                </div>
                 <p class="font-bingo font-bold text-xl text-gray-600">
                     No questions found.<br>
                     Add questions to the database first!
@@ -332,7 +372,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 <a href="temas_ingles.php"
                    class="botao-acao mt-6 bg-azul-vibrante text-white inline-flex"
                    style="text-decoration:none;">
-                    ← Back to Topics
+                    Back to Topics
                 </a>
             </div>
             <?php endif; ?>
@@ -357,7 +397,7 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
     <div id="overlay-resultado" role="dialog" aria-modal="true" aria-labelledby="titulo-resultado">
         <div id="caixa-resultado">
 
-            <div class="emoji-resultado" id="emoji-resultado">🎉</div>
+            <div class="text-3xl font-gooddog text-verde-vibrante font-bold mb-2">COMPLETE!</div>
 
             <h2 id="titulo-resultado"
                 class="font-gooddog text-4xl font-bold text-tinta-escura tracking-wider mt-3">
@@ -368,52 +408,43 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 You finished all questions!
             </p>
 
-            <div class="inline-block bg-amarelo-vibrante borda-tinta-escura rounded-2xl px-6 py-3 shadow-sombra-cartum-branca mb-6">
+            <div class="inline-block bg-amarelo-vibrante borda-tinta-escura rounded-2xl px-6 py-3 shadow-sombra-cartum-branca mb-4">
                 <span class="font-bingo font-bold text-2xl text-tinta-escura">
                     Score: <span id="pontos-finais">0</span> / <?= $total_perguntas ?>
                 </span>
             </div>
 
+            <div id="info-pontuacao-jogo" class="my-2"></div>
+
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <button onclick="reiniciarJogo()"
                         class="botao-acao bg-verde-vibrante text-white">
-                    🔄 Play Again
+                    Play Again
                 </button>
                 <a href="temas_ingles.php"
                    class="botao-acao bg-amarelo-vibrante text-tinta-escura"
                    style="text-decoration: none;">
-                    📌 Other Topics
+                    Other Topics
                 </a>
                 <a href="index.php"
                    class="botao-acao bg-papel-claro text-tinta-escura"
                    style="text-decoration: none;">
-                    🏠 Menu
+                    Menu
                 </a>
             </div>
 
         </div>
     </div>
 
-    <!-- ============================================================
-         JAVASCRIPT DO JOGO
-         ============================================================ -->
+    <!-- JAVASCRIPT DO JOGO -->
     <script>
-    /* ----------------------------------------------------------
-       Dados injetados pelo PHP (ordem já randomizada no servidor)
-    ---------------------------------------------------------- */
     const PERGUNTAS = <?= $perguntas_json ?>;
-    const TOTAL     = PERGUNTAS.length;
+    const TOTAL     = Array.isArray(PERGUNTAS) ? PERGUNTAS.length : 0;
 
-    /* ----------------------------------------------------------
-       Estado global do jogo
-    ---------------------------------------------------------- */
     let indicePerguntaAtual = 0;
     let pontuacao           = 0;
     let respondeuAtual      = false;
 
-    /* ----------------------------------------------------------
-       Referências ao DOM
-    ---------------------------------------------------------- */
     const elPrimeiraParte    = document.getElementById('texto-primeira-parte');
     const elSegundaParte     = document.getElementById('texto-segunda-parte');
     const elLacuna           = document.getElementById('lacuna-resposta');
@@ -427,11 +458,9 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
     const elBarraInterna     = document.getElementById('barra-progresso-interna');
     const elOverlay          = document.getElementById('overlay-resultado');
     const elPontosFinais     = document.getElementById('pontos-finais');
-    const elEmojiResultado   = document.getElementById('emoji-resultado');
     const elTituloResultado  = document.getElementById('titulo-resultado');
     const elTextoResultado   = document.getElementById('texto-resultado');
 
-    /* Pré-carregamento dos 7 fundos para evitar atrasos na troca */
     const LISTA_FUNDOS = [
         'fundo_resposta_completar/1.png',
         'fundo_resposta_completar/2.png',
@@ -446,48 +475,47 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
         img.src = src;
     });
 
-    /* ----------------------------------------------------------
-       Carrega a pergunta atual
-    ---------------------------------------------------------- */
     function carregarPergunta() {
-        if (indicePerguntaAtual >= TOTAL) {
+        if (!TOTAL || indicePerguntaAtual >= TOTAL) {
             mostrarResultadoFinal();
             return;
         }
 
         respondeuAtual = false;
         const p = PERGUNTAS[indicePerguntaAtual];
+        if (!p) return;
 
-        // Atualiza a imagem de fundo atrás da lacuna com a cor sorteada para esta pergunta
         if (elFundoLacunaImg && p.fundo_lacuna) {
             elFundoLacunaImg.src = p.fundo_lacuna;
         }
 
-        elPrimeiraParte.textContent = p.primeira_parte;
-        elSegundaParte.textContent  = p.segunda_parte;
+        if (elPrimeiraParte) elPrimeiraParte.textContent = p.primeira_parte || '';
+        if (elSegundaParte)  elSegundaParte.textContent  = p.segunda_parte || '';
 
-        elLacuna.textContent = '_____';
-        elLacuna.className   = 'lacuna';
+        if (elLacuna) {
+            elLacuna.textContent = '_____';
+            elLacuna.className   = 'lacuna';
+        }
         if (elConteinerLacuna) {
             elConteinerLacuna.className = 'conteiner-lacuna';
         }
 
-        elFeedback.textContent = '';
-        elFeedback.style.color = '';
+        if (elFeedback) {
+            elFeedback.textContent = '';
+            elFeedback.style.color = '';
+        }
 
         const pct = Math.round((indicePerguntaAtual / TOTAL) * 100);
-        elLabelProgresso.textContent   = `Question ${indicePerguntaAtual + 1} of ${TOTAL}`;
-        elLabelPorcentagem.textContent = `${pct}%`;
-        elBarraInterna.style.width     = `${pct}%`;
+        if (elLabelProgresso)   elLabelProgresso.textContent   = `Question ${indicePerguntaAtual + 1} of ${TOTAL}`;
+        if (elLabelPorcentagem) elLabelPorcentagem.textContent = `${pct}%`;
+        if (elBarraInterna)     elBarraInterna.style.width     = `${pct}%`;
 
         gerarOpcoes(p);
     }
 
-    /* ----------------------------------------------------------
-       Gera os cards de opção embaralhados (Fisher-Yates)
-    ---------------------------------------------------------- */
     function gerarOpcoes(pergunta) {
-        const opcoes = [pergunta.resposta, ...pergunta.erradas];
+        if (!elGradeOpcoes) return;
+        const opcoes = [pergunta.resposta, ...(Array.isArray(pergunta.erradas) ? pergunta.erradas : [])];
 
         for (let i = opcoes.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -508,119 +536,134 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
         });
     }
 
-    /* ----------------------------------------------------------
-       Verifica se a opção escolhida é a correta
-    ---------------------------------------------------------- */
     function verificarResposta(cardClicado, escolha, correta) {
         if (respondeuAtual) return;
         respondeuAtual = true;
 
-        const acertou = escolha.toLowerCase().trim() === correta.toLowerCase().trim();
+        const acertou = String(escolha).toLowerCase().trim() === String(correta).toLowerCase().trim();
 
         if (acertou) {
             cardClicado.classList.add('opcao-correta');
-            elLacuna.textContent = escolha;
-            elLacuna.classList.add('lacuna-correta');
+            if (elLacuna) {
+                elLacuna.textContent = escolha;
+                elLacuna.classList.add('lacuna-correta');
+            }
             if (elConteinerLacuna) {
                 elConteinerLacuna.classList.add('lacuna-acertou');
             }
 
-            elFeedback.textContent = '✅ Correct! Well done! 🌟';
-            elFeedback.style.color = '#054D20';
+            if (elFeedback) {
+                elFeedback.textContent = 'Correct! Well done!';
+                elFeedback.style.color = '#054D20';
+            }
 
             pontuacao++;
-            elPlacar.textContent = `${pontuacao} / ${TOTAL}`;
+            if (elPlacar) elPlacar.textContent = `${pontuacao} / ${TOTAL}`;
 
             desabilitarOutrasOpcoes(cardClicado);
             setTimeout(avancarPergunta, 1400);
 
         } else {
             cardClicado.classList.add('opcao-errada');
-            elLacuna.textContent = escolha;
-            elLacuna.classList.add('lacuna-errada');
+            if (elLacuna) {
+                elLacuna.textContent = escolha;
+                elLacuna.classList.add('lacuna-errada');
+            }
             if (elConteinerLacuna) {
                 elConteinerLacuna.classList.add('lacuna-errou');
             }
 
-            elFeedback.textContent = '❌ Try again! You can do it! 💪';
-            elFeedback.style.color = '#b91c1c';
+            if (elFeedback) {
+                elFeedback.textContent = 'Try again! You can do it!';
+                elFeedback.style.color = '#b91c1c';
+            }
 
             setTimeout(() => {
                 respondeuAtual = false;
                 cardClicado.classList.remove('opcao-errada');
-                elLacuna.textContent = '_____';
-                elLacuna.className   = 'lacuna';
+                if (elLacuna) {
+                    elLacuna.textContent = '_____';
+                    elLacuna.className   = 'lacuna';
+                }
                 if (elConteinerLacuna) {
                     elConteinerLacuna.classList.remove('lacuna-errou');
                 }
-                elFeedback.textContent = '';
-                elFeedback.style.color = '';
+                if (elFeedback) {
+                    elFeedback.textContent = '';
+                    elFeedback.style.color = '';
+                }
             }, 900);
         }
     }
 
-    /* ----------------------------------------------------------
-       Desabilita todos os cards exceto o correto
-    ---------------------------------------------------------- */
     function desabilitarOutrasOpcoes(cardCorreto) {
+        if (!elGradeOpcoes) return;
         elGradeOpcoes.querySelectorAll('.cartao-opcao').forEach(card => {
             if (card !== cardCorreto) card.classList.add('opcao-desabilitada');
         });
     }
 
-    /* ----------------------------------------------------------
-       Avança para a próxima pergunta
-    ---------------------------------------------------------- */
     function avancarPergunta() {
         indicePerguntaAtual++;
         carregarPergunta();
     }
 
-    /* ----------------------------------------------------------
-       Exibe o overlay de resultado final
-    ---------------------------------------------------------- */
     function mostrarResultadoFinal() {
-        elBarraInterna.style.width     = '100%';
-        elLabelPorcentagem.textContent = '100%';
-        elLabelProgresso.textContent   = `Finished! ${TOTAL} of ${TOTAL}`;
+        if (!elOverlay) return;
+        if (elBarraInterna)     elBarraInterna.style.width     = '100%';
+        if (elLabelPorcentagem) elLabelPorcentagem.textContent = '100%';
+        if (elLabelProgresso)   elLabelProgresso.textContent   = `Finished! ${TOTAL} of ${TOTAL}`;
 
-        const taxa = pontuacao / TOTAL;
+        const taxa = TOTAL > 0 ? pontuacao / TOTAL : 0;
         if (taxa === 1) {
-            elEmojiResultado.textContent  = '🏆';
-            elTituloResultado.textContent = 'PERFECT SCORE!';
-            elTextoResultado.textContent  = 'Amazing! You got everything right!';
+            if (elTituloResultado) elTituloResultado.textContent = 'PERFECT SCORE!';
+            if (elTextoResultado)  elTextoResultado.textContent  = 'Amazing! You got everything right!';
         } else if (taxa >= 0.7) {
-            elEmojiResultado.textContent  = '🎉';
-            elTituloResultado.textContent = 'GREAT JOB!';
-            elTextoResultado.textContent  = 'You did really well! Keep it up!';
+            if (elTituloResultado) elTituloResultado.textContent = 'GREAT JOB!';
+            if (elTextoResultado)  elTextoResultado.textContent  = 'You did really well! Keep it up!';
         } else if (taxa >= 0.4) {
-            elEmojiResultado.textContent  = '😊';
-            elTituloResultado.textContent = 'GOOD TRY!';
-            elTextoResultado.textContent  = 'You\'re learning! Play again to improve!';
+            if (elTituloResultado) elTituloResultado.textContent = 'GOOD TRY!';
+            if (elTextoResultado)  elTextoResultado.textContent  = 'You are learning! Play again to improve!';
         } else {
-            elEmojiResultado.textContent  = '💪';
-            elTituloResultado.textContent = 'KEEP GOING!';
-            elTextoResultado.textContent  = 'Practice makes perfect! Try again!';
+            if (elTituloResultado) elTituloResultado.textContent = 'KEEP GOING!';
+            if (elTextoResultado)  elTextoResultado.textContent  = 'Practice makes perfect! Try again!';
         }
 
-        elPontosFinais.textContent = pontuacao;
+        if (elPontosFinais) elPontosFinais.textContent = pontuacao;
+
+        // Salva estatísticas e pontuação calculada no backend (acertos*100 - erros*65)
+        fetch('salvar_pontuacao.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questoesRespondidas: TOTAL, acertos: pontuacao })
+        }).then(r => r.json()).then(data => {
+            const elInfo = document.getElementById('info-pontuacao-jogo');
+            if (elInfo && data && data.sucesso) {
+                const sinal = data.pontuacao_partida > 0 ? '+' : '';
+                elInfo.innerHTML = `
+                    <div class="bg-papel-claro borda-tinta-escura rounded-2xl p-3 shadow-sombra-cartum-branca mb-3 text-center">
+                        <span class="block text-xs font-black text-verde-escuro uppercase tracking-wider font-bingo">PONTOS GANHOS</span>
+                        <span class="font-gooddog text-3xl font-bold text-verde-vibrante">${sinal}${data.pontuacao_partida} pts</span>
+                        <span class="block text-xs font-bold text-gray-500 font-bingo mt-1">Pontuação Total: ${data.pontuacao_total} pts</span>
+                    </div>
+                `;
+            }
+        }).catch(err => console.error(err));
+
         elOverlay.classList.add('ativo');
     }
 
-    /* ----------------------------------------------------------
-       Reinicia o jogo — uma nova ordem é definida pelo PHP
-       ao recarregar a página com "Play Again"
-    ---------------------------------------------------------- */
     function reiniciarJogo() {
-        // Recarrega a página para que o PHP gere uma nova ordem aleatória
         window.location.reload();
     }
 
-    /* ----------------------------------------------------------
-       Inicialização
-    ---------------------------------------------------------- */
-    if (TOTAL > 0) carregarPergunta();
+    if (TOTAL > 0) {
+        carregarPergunta();
+    }
     </script>
+
+    <!-- Script de Acessibilidade & Modo Escuro -->
+    <script src="js/acessibilidade.js"></script>
 
 </body>
 </html>

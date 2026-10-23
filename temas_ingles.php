@@ -9,7 +9,8 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/proteger.php';
 
 // Busca todos os temas cadastrados via SELECT * no banco de dados
-$sql_temas = "SELECT * FROM `Tema` ORDER BY `id` ASC";
+$tbl_tema = db_table($conn, 'Tema');
+$sql_temas = "SELECT * FROM {$tbl_tema} ORDER BY `id` ASC";
 $resultado_temas = $conn->query($sql_temas);
 
 $temas = [];

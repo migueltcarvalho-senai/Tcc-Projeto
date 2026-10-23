@@ -10,9 +10,11 @@ require_once __DIR__ . '/config/proteger.php';
 
 // Busca os temas específicos do jogo dos balões (id_jogo = 2)
 $id_jogo = 2;
-$sql_temas = "SELECT * FROM `Tema` WHERE `id_jogo` = ? ORDER BY `id` ASC";
+$tbl_tema = db_table($conn, "Tema");
+$tbl_frases = db_table($conn, "Frases");
+$sql_temas = "SELECT * FROM {$tbl_tema} WHERE `id_jogo` = ? ORDER BY `id` ASC";
 $stmt_temas = $conn->prepare($sql_temas);
-$stmt_temas->bind_param("i", $id_jogo);
+if ($stmt_temas) { $stmt_temas->bind_param("i", $id_jogo);
 $stmt_temas->execute();
 $resultado_temas = $stmt_temas->get_result();
 
@@ -22,7 +24,7 @@ if ($resultado_temas) {
         $temas[] = $linha;
     }
 }
-$stmt_temas->close();
+$stmt_temas->close(); }
 
 // Fallback: se nenhum tema tiver id_jogo = 2 explicitamente, busca temas associados a frases
 if (empty($temas)) {

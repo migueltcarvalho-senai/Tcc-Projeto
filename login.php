@@ -10,7 +10,7 @@ if (isset($_SESSION['id'])) {
 
 $erro = '';
 $sucesso = '';
-$nome = '';
+$loginInput = '';
 
 // Mensagem de sucesso após cadastro vindo de registro.php
 if (isset($_GET['cadastrado']) && $_GET['cadastrado'] == '1') {
@@ -18,17 +18,19 @@ if (isset($_GET['cadastrado']) && $_GET['cadastrado'] == '1') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = trim($_POST['nome'] ?? $_POST['login'] ?? '');
-    $senha = $_POST['senha'] ?? '';
+    $loginInput = trim($_POST['login'] ?? $_POST['nome'] ?? '');
+    $senha      = $_POST['senha'] ?? '';
 
-    if (empty($nome) || empty($senha)) {
+    if (empty($loginInput) || empty($senha)) {
         $erro = 'Por favor, preencha todos os campos.';
     } else {
-        $sql = "SELECT id, nome, senha, pontuacaoPrimeiroJogo, pontuacaoSegundojogo FROM usuarios WHERE nome = ? LIMIT 1";
+        $tbl_usuarios = db_table($conn, "usuarios");
+        // Permite login por nome de usuário ou e-mail
+        $sql = "SELECT id, nome, email, senha, pontuacao, questoesRespondidas, acertos FROM {$tbl_usuarios} WHERE nome = ? OR email = ? LIMIT 1";
         $stmt = $conn->prepare($sql);
 
         if ($stmt) {
-            $stmt->bind_param("s", $nome);
+            $stmt->bind_param("ss", $loginInput, $loginInput);
             $stmt->execute();
             $result = $stmt->get_result();
             $user = $result->fetch_assoc();
@@ -38,9 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (password_verify($senha, $user['senha'])) {
                     $senhaValida = true;
                 } elseif ($senha === $user['senha']) {
+                    // Atualiza hash se estiver em texto puro antigo
                     $senhaValida = true;
                     $novoHash = password_hash($senha, PASSWORD_DEFAULT);
-                    $updateStmt = $conn->prepare("UPDATE usuarios SET senha = ? WHERE id = ?");
+                    $updateStmt = $conn->prepare("UPDATE {$tbl_usuarios} SET senha = ? WHERE id = ?");
                     if ($updateStmt) {
                         $updateStmt->bind_param("si", $novoHash, $user['id']);
                         $updateStmt->execute();
@@ -50,15 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if ($senhaValida) {
-                $_SESSION['id'] = $user['id'];
-                $_SESSION['user'] = $user['nome'];
-                $_SESSION['pontuacaoPrimeiroJogo'] = $user['pontuacaoPrimeiroJogo'] ?? 0;
-                $_SESSION['pontuacaoSegundojogo'] = $user['pontuacaoSegundojogo'] ?? 0;
+                $_SESSION['id']                  = (int) $user['id'];
+                $_SESSION['user']                = $user['nome'];
+                $_SESSION['email']               = $user['email'];
+                $_SESSION['pontuacao']           = (int) ($user['pontuacao'] ?? 0);
+                $_SESSION['questoesRespondidas'] = (int) ($user['questoesRespondidas'] ?? 0);
+                $_SESSION['acertos']             = (int) ($user['acertos'] ?? 0);
 
                 header('Location: index.php');
                 exit;
             } else {
-                $erro = 'Nome de usuário ou senha incorretos.';
+                $erro = 'Nome de usuário/e-mail ou senha incorretos.';
             }
 
             $stmt->close();
@@ -113,10 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 
-    <!-- Folha de Estilo Específica para Autenticação Lúdica -->
+    <!-- Estilos das Telas de Autenticação -->
     <link rel="stylesheet" href="css/auth.css">
 </head>
-<body class="font-bingo text-tinta-escura flex flex-col justify-center items-center min-h-screen p-3 sm:p-6 md:p-8">
+<body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-center items-center p-3 sm:p-6 relative">
 
     <!-- ELEMENTOS OSCILANTES DE FUNDO -->
     <div id="elementos-fundo-oscilantes" aria-hidden="true">
@@ -126,13 +131,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="elemento-fundo-oscilante elemento-fundo-4"></div>
     </div>
 
-    <!-- FOLHA DO LIVRO / CADERNO ESCOLAR -->
-    <main id="livro-conteiner-principal" class="w-full max-w-xl caderno-pagina-branca p-6 sm:p-8 md:p-10 my-6">
+    <!-- LIVRO / CADERNO PRINCIPAL DE LOGIN -->
+    <main class="w-full max-w-lg caderno-pagina-branca rounded-3xl p-5 sm:p-8 md:p-10 relative">
 
         <!-- ESPIRAL DO CADERNO NO TOPO -->
-        <div id="espiral-topo-caderno" class="w-full flex justify-between items-center -mt-9 sm:-mt-12 mb-6 z-20 px-2 sm:px-6" aria-hidden="true">
-            <div class="espiral-caderno"></div>
-            <div class="espiral-caderno"></div>
+        <div class="w-full flex justify-between items-center -mt-9 sm:-mt-12 mb-4 z-20 px-2 sm:px-4">
             <div class="espiral-caderno"></div>
             <div class="espiral-caderno"></div>
             <div class="espiral-caderno"></div>
@@ -144,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <!-- CABEÇALHO COM TÍTULO VIBRANTE E LETRAS ENTORTADAS -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-6">
             <h1 class="font-gooddog text-6xl sm:text-7xl md:text-8xl font-bold tracking-wider leading-none select-none my-1">
                 <span class="letra-vibrante text-laranja-vibrante" style="transform: rotate(-6deg);">L</span>
                 <span class="letra-vibrante text-azul-vibrante" style="transform: rotate(5deg);">O</span>
@@ -153,57 +156,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="letra-vibrante text-rosa-vibrante" style="transform: rotate(-5deg);">N</span>
                 <span class="letra-vibrante text-laranja-vibrante" style="transform: rotate(7deg);">!</span>
             </h1>
-            <p class="font-bingo text-lg sm:text-xl font-bold text-gray-700 tracking-wide mt-2">
-                Digite seu nome e sua senha para acessar
+            <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 tracking-wide mt-2">
+                Digite seu usuário ou e-mail e sua senha para entrar
             </p>
         </div>
 
         <!-- ALERTA DE ERRO -->
         <?php if (!empty($erro)): ?>
-            <div class="alerta-ludico alerta-erro p-3.5 mb-6 text-center">
+            <div class="alerta-ludico alerta-erro p-3.5 mb-5 text-center">
                 <span class="font-bingo text-base sm:text-lg font-bold"><?= htmlspecialchars($erro) ?></span>
             </div>
         <?php endif; ?>
 
         <!-- ALERTA DE SUCESSO -->
         <?php if (!empty($sucesso)): ?>
-            <div class="alerta-ludico alerta-sucesso p-3.5 mb-6 text-center">
+            <div class="alerta-ludico alerta-sucesso p-3.5 mb-5 text-center">
                 <span class="font-bingo text-base sm:text-lg font-bold"><?= htmlspecialchars($sucesso) ?></span>
             </div>
         <?php endif; ?>
 
         <!-- FORMULÁRIO DE LOGIN -->
-        <form method="POST" action="login.php" class="space-y-5">
-            <!-- CAMPO NOME (LIGEIRAMENTE INCLINADO) -->
+        <form method="POST" action="login.php" class="space-y-4">
+            <!-- CAMPO IDENTIFICADOR (NOME OU EMAIL) -->
             <div class="campo-wrapper campo-inclinado-1">
-                <label for="nome" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
-                    <span class="inline-block w-3.5 h-3.5 bg-verde-vibrante border-2 border-tinta-escura rounded-sm"></span>
-                    NOME DE USUÁRIO:
+                <label for="login" class="block font-bingo text-lg sm:text-xl font-bold text-tinta-escura mb-1 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 bg-verde-vibrante border-2 border-tinta-escura rounded-sm"></span>
+                    NOME OU E-MAIL:
                 </label>
                 <input 
                     type="text" 
-                    id="nome" 
-                    name="nome" 
-                    class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
-                    placeholder="Digite seu nome" 
-                    value="<?= htmlspecialchars($nome) ?>" 
+                    id="login" 
+                    name="login" 
+                    class="input-ludico w-full py-3 px-4 font-bingo text-lg sm:text-xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
+                    placeholder="Digite seu nome ou e-mail" 
+                    value="<?= htmlspecialchars($loginInput) ?>" 
                     required 
                     autofocus
                     autocomplete="username"
                 >
             </div>
 
-            <!-- CAMPO SENHA (LIGEIRAMENTE INCLINADO) -->
+            <!-- CAMPO SENHA -->
             <div class="campo-wrapper campo-inclinado-2">
-                <label for="senha" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
-                    <span class="inline-block w-3.5 h-3.5 bg-azul-vibrante border-2 border-tinta-escura rounded-sm"></span>
+                <label for="senha" class="block font-bingo text-lg sm:text-xl font-bold text-tinta-escura mb-1 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 bg-azul-vibrante border-2 border-tinta-escura rounded-sm"></span>
                     SENHA:
                 </label>
                 <input 
                     type="password" 
                     id="senha" 
                     name="senha" 
-                    class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
+                    class="input-ludico w-full py-3 px-4 font-bingo text-lg sm:text-xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
                     placeholder="Digite sua senha" 
                     required
                     autocomplete="current-password"
@@ -219,8 +222,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <!-- RODAPÉ DO CADERNO / LINK PARA REGISTRO -->
-        <div class="mt-8 pt-5 border-t-2 border-dashed border-gray-300 text-center">
-            <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 mb-2.5">
+        <div class="mt-6 pt-4 border-t-2 border-dashed border-gray-300 text-center">
+            <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 mb-2">
                 Ainda não tem uma conta?
             </p>
             <a href="registro.php" class="botao-cartum botao-laranja inline-block px-6 py-2.5 text-base sm:text-lg font-bold">

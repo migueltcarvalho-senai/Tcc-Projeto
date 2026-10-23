@@ -10,41 +10,53 @@ if (isset($_SESSION['id'])) {
 
 $erro = '';
 $nome = '';
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = trim($_POST['nome'] ?? '');
-    $senha = $_POST['senha'] ?? '';
+    $nome           = trim($_POST['nome'] ?? '');
+    $email          = trim($_POST['email'] ?? '');
+    $senha          = $_POST['senha'] ?? '';
     $confirmarSenha = $_POST['confirmar_senha'] ?? '';
 
-    if (empty($nome) || empty($senha) || empty($confirmarSenha)) {
+    if (empty($nome) || empty($email) || empty($senha) || empty($confirmarSenha)) {
         $erro = 'Por favor, preencha todos os campos.';
     } elseif (mb_strlen($nome) < 3) {
         $erro = 'O nome de usuário deve conter pelo menos 3 caracteres.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $erro = 'Por favor, informe um endereço de e-mail válido.';
     } elseif (strlen($senha) < 4) {
         $erro = 'A senha deve conter pelo menos 4 caracteres.';
     } elseif ($senha !== $confirmarSenha) {
         $erro = 'As senhas informadas não coincidem. Tente novamente.';
     } else {
-        // Verifica se já existe um usuário com o mesmo nome
-        $checkSql = "SELECT id FROM usuarios WHERE nome = ? LIMIT 1";
+        $tbl_usuarios = db_table($conn, "usuarios");
+        
+        // Verifica se já existe usuário com o mesmo nome ou email
+        $checkSql = "SELECT id, nome, email FROM {$tbl_usuarios} WHERE nome = ? OR email = ? LIMIT 1";
         $checkStmt = $conn->prepare($checkSql);
 
         if ($checkStmt) {
-            $checkStmt->bind_param("s", $nome);
+            $checkStmt->bind_param("ss", $nome, $email);
             $checkStmt->execute();
-            $checkStmt->store_result();
+            $checkRes = $checkStmt->get_result();
 
-            if ($checkStmt->num_rows > 0) {
-                $erro = 'Esse nome de usuário já está em uso. Por favor, escolha outro.';
+            if ($checkRow = $checkRes->fetch_assoc()) {
+                if (strcasecmp($checkRow['nome'], $nome) === 0) {
+                    $erro = 'Esse nome de usuário já está em uso. Por favor, escolha outro.';
+                } else {
+                    $erro = 'Esse e-mail já está cadastrado. Faça login ou use outro.';
+                }
             } else {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $pontuacaoInicial = 0;
+                $questoesInicial  = 0;
+                $acertosInicial   = 0;
 
-                $insertSql = "INSERT INTO usuarios (nome, senha, pontuacaoPrimeiroJogo, pontuacaoSegundojogo) VALUES (?, ?, ?, ?)";
+                $insertSql = "INSERT INTO {$tbl_usuarios} (nome, senha, email, pontuacao, questoesRespondidas, acertos) VALUES (?, ?, ?, ?, ?, ?)";
                 $insertStmt = $conn->prepare($insertSql);
 
                 if ($insertStmt) {
-                    $insertStmt->bind_param("ssii", $nome, $senhaHash, $pontuacaoInicial, $pontuacaoInicial);
+                    $insertStmt->bind_param("sssiii", $nome, $senhaHash, $email, $pontuacaoInicial, $questoesInicial, $acertosInicial);
                     
                     if ($insertStmt->execute()) {
                         $insertStmt->close();
@@ -111,10 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 
-    <!-- Folha de Estilo Específica para Autenticação Lúdica -->
+    <!-- Estilos das Telas de Autenticação -->
     <link rel="stylesheet" href="css/auth.css">
 </head>
-<body class="font-bingo text-tinta-escura flex flex-col justify-center items-center min-h-screen p-3 sm:p-6 md:p-8">
+<body class="font-bingo min-h-screen text-tinta-escura flex flex-col justify-center items-center p-3 sm:p-6 relative">
 
     <!-- ELEMENTOS OSCILANTES DE FUNDO -->
     <div id="elementos-fundo-oscilantes" aria-hidden="true">
@@ -124,13 +136,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="elemento-fundo-oscilante elemento-fundo-4"></div>
     </div>
 
-    <!-- FOLHA DO LIVRO / CADERNO ESCOLAR -->
-    <main id="livro-conteiner-principal" class="w-full max-w-xl caderno-pagina-branca p-6 sm:p-8 md:p-10 my-6">
+    <!-- LIVRO / CADERNO PRINCIPAL DE REGISTRO -->
+    <main class="w-full max-w-lg caderno-pagina-branca rounded-3xl p-5 sm:p-8 md:p-10 relative">
 
         <!-- ESPIRAL DO CADERNO NO TOPO -->
-        <div id="espiral-topo-caderno" class="w-full flex justify-between items-center -mt-9 sm:-mt-12 mb-6 z-20 px-2 sm:px-6" aria-hidden="true">
-            <div class="espiral-caderno"></div>
-            <div class="espiral-caderno"></div>
+        <div class="w-full flex justify-between items-center -mt-9 sm:-mt-12 mb-4 z-20 px-2 sm:px-4">
             <div class="espiral-caderno"></div>
             <div class="espiral-caderno"></div>
             <div class="espiral-caderno"></div>
@@ -142,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <!-- CABEÇALHO COM TÍTULO VIBRANTE E LETRAS ENTORTADAS -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-6">
             <h1 class="font-gooddog text-5xl sm:text-6xl md:text-7xl font-bold tracking-wider leading-none select-none my-1">
                 <span class="letra-vibrante text-verde-vibrante" style="transform: rotate(-6deg);">C</span>
                 <span class="letra-vibrante text-laranja-vibrante" style="transform: rotate(5deg);">A</span>
@@ -154,31 +164,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="letra-vibrante text-azul-vibrante" style="transform: rotate(6deg);">O</span>
                 <span class="letra-vibrante text-amarelo-vibrante" style="transform: rotate(-6deg);">!</span>
             </h1>
-            <p class="font-bingo text-lg sm:text-xl font-bold text-gray-700 tracking-wide mt-2">
+            <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 tracking-wide mt-2">
                 Preencha os campos abaixo para criar sua conta
             </p>
         </div>
 
         <!-- ALERTA DE ERRO -->
         <?php if (!empty($erro)): ?>
-            <div class="alerta-ludico alerta-erro p-3.5 mb-6 text-center">
+            <div class="alerta-ludico alerta-erro p-3.5 mb-5 text-center">
                 <span class="font-bingo text-base sm:text-lg font-bold"><?= htmlspecialchars($erro) ?></span>
             </div>
         <?php endif; ?>
 
         <!-- FORMULÁRIO DE CADASTRO -->
-        <form method="POST" action="registro.php" class="space-y-5">
-            <!-- CAMPO NOME (LIGEIRAMENTE INCLINADO) -->
+        <form method="POST" action="registro.php" class="space-y-4">
+            <!-- CAMPO NOME -->
             <div class="campo-wrapper campo-inclinado-1">
-                <label for="nome" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
-                    <span class="inline-block w-3.5 h-3.5 bg-verde-vibrante border-2 border-tinta-escura rounded-sm"></span>
+                <label for="nome" class="block font-bingo text-lg sm:text-xl font-bold text-tinta-escura mb-1 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 bg-verde-vibrante border-2 border-tinta-escura rounded-sm"></span>
                     NOME DE USUÁRIO:
                 </label>
                 <input 
                     type="text" 
                     id="nome" 
                     name="nome" 
-                    class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
+                    class="input-ludico w-full py-3 px-4 font-bingo text-lg sm:text-xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
                     placeholder="Digite seu nome de usuário" 
                     value="<?= htmlspecialchars($nome) ?>" 
                     required 
@@ -187,34 +197,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 >
             </div>
 
-            <!-- CAMPO SENHA (LIGEIRAMENTE INCLINADO) -->
+            <!-- CAMPO EMAIL -->
             <div class="campo-wrapper campo-inclinado-2">
-                <label for="senha" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
-                    <span class="inline-block w-3.5 h-3.5 bg-laranja-vibrante border-2 border-tinta-escura rounded-sm"></span>
+                <label for="email" class="block font-bingo text-lg sm:text-xl font-bold text-tinta-escura mb-1 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 bg-amarelo-vibrante border-2 border-tinta-escura rounded-sm"></span>
+                    E-MAIL:
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="input-ludico w-full py-3 px-4 font-bingo text-lg sm:text-xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
+                    placeholder="exemplo@escola.com" 
+                    value="<?= htmlspecialchars($email) ?>" 
+                    required 
+                    autocomplete="email"
+                >
+            </div>
+
+            <!-- CAMPO SENHA -->
+            <div class="campo-wrapper campo-inclinado-3">
+                <label for="senha" class="block font-bingo text-lg sm:text-xl font-bold text-tinta-escura mb-1 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 bg-laranja-vibrante border-2 border-tinta-escura rounded-sm"></span>
                     SENHA:
                 </label>
                 <input 
                     type="password" 
                     id="senha" 
                     name="senha" 
-                    class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
+                    class="input-ludico w-full py-3 px-4 font-bingo text-lg sm:text-xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
                     placeholder="Mínimo de 4 caracteres" 
                     required
                     autocomplete="new-password"
                 >
             </div>
 
-            <!-- CAMPO CONFIRMAÇÃO DE SENHA (LIGEIRAMENTE INCLINADO) -->
-            <div class="campo-wrapper campo-inclinado-3">
-                <label for="confirmar_senha" class="block font-bingo text-xl sm:text-2xl font-bold text-tinta-escura mb-1.5 flex items-center gap-2">
-                    <span class="inline-block w-3.5 h-3.5 bg-azul-vibrante border-2 border-tinta-escura rounded-sm"></span>
+            <!-- CAMPO CONFIRMAÇÃO DE SENHA -->
+            <div class="campo-wrapper campo-inclinado-1">
+                <label for="confirmar_senha" class="block font-bingo text-lg sm:text-xl font-bold text-tinta-escura mb-1 flex items-center gap-2">
+                    <span class="inline-block w-3 h-3 bg-azul-vibrante border-2 border-tinta-escura rounded-sm"></span>
                     CONFIRMAR SENHA:
                 </label>
                 <input 
                     type="password" 
                     id="confirmar_senha" 
                     name="confirmar_senha" 
-                    class="input-ludico w-full py-3.5 px-4 font-bingo text-xl sm:text-2xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
+                    class="input-ludico w-full py-3 px-4 font-bingo text-lg sm:text-xl font-bold placeholder:text-gray-400 placeholder:font-normal" 
                     placeholder="Repita sua senha" 
                     required
                     autocomplete="new-password"
@@ -230,8 +258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <!-- RODAPÉ DO CADERNO / LINK PARA LOGIN -->
-        <div class="mt-8 pt-5 border-t-2 border-dashed border-gray-300 text-center">
-            <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 mb-2.5">
+        <div class="mt-6 pt-4 border-t-2 border-dashed border-gray-300 text-center">
+            <p class="font-bingo text-base sm:text-lg font-bold text-gray-700 mb-2">
                 Já possui uma conta?
             </p>
             <a href="login.php" class="botao-cartum botao-verde inline-block px-6 py-2.5 text-base sm:text-lg font-bold">

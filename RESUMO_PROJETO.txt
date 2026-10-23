@@ -312,8 +312,29 @@ c:\laragon\www\Tcc-Projeto\
 │   └── tccdb_hosting.sql         # Script SQL pronto para hosting externo / remoto
 │
 └── config/
-    ├── config.php               # Conexão centralizada com o banco tccdb
+    ├── config.php               # Conexão centralizada com o banco tccdb (com suporte a env vars e db_table)
     └── proteger.php             # Script auxiliar de proteção/sessão
+
+--------------------------------------------------------------------------------
+10. COMPATIBILIDADE E REFATORAÇÃO PARA HOSPEDAGENS LINUX
+--------------------------------------------------------------------------------
+- Resolução Dinâmica de Tabelas (db_table):
+  * Em servidores Linux (ext4), o MySQL opera por padrão em lower_case_table_names=0
+    (estritamente case-sensitive).
+  * A função db_table($conn, $tabela) mapeia dinamicamente as tabelas existentes
+    via SHOW TABLES, resolvendo discrepâncias entre 'Tema' e 'tema', 'Pergunta'
+    e 'pergunta', 'Frases' e 'frases', 'Jogo' e 'jogo', 'usuarios' e 'usuario'.
+- Configuração de Charset Obrigatória (utf8mb4):
+  * Ativação de $conn->set_charset('utf8mb4') para garantir integridade de acentos
+    e evitar falhas de serialização no json_encode em distribuições Linux.
+- Tratamento de Falhas e Desativação de Exceptions Automáticas (PHP 8.1+):
+  * Definição de mysqli_report(MYSQLI_REPORT_OFF) com verificações estritas de
+    $stmt e prepared statements, prevenindo erros 500 caso tabelas/linhas estejam
+    vazias.
+- Resolução de Caminhos Globais:
+  * Substituição de caminhos relativos em glob() por __DIR__ absoluto, garantindo
+    que os assets (como baloes/cores/*.gif) sejam carregados com precisão
+    independentemente do document_root do servidor web Linux.
 ================================================================================
 FIM DO RELATÓRIO
 ================================================================================
