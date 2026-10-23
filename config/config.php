@@ -44,6 +44,16 @@ function db_table(mysqli $conn, string $tabela): string {
         }
     }
     $lower = strtolower($tabela);
+
+    // Mapeamento direto ou resolução de fallback para variações comuns
+    if (!isset($map[$lower])) {
+        if ($lower === 'usuario' && isset($map['usuarios'])) {
+            $lower = 'usuarios';
+        } elseif ($lower === 'usuarios' && isset($map['usuario'])) {
+            $lower = 'usuario';
+        }
+    }
+
     $real = $map[$lower] ?? $tabela;
     return "`" . str_replace("`", "``", $real) . "`";
 }

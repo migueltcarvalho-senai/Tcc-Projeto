@@ -39,15 +39,11 @@ CREATE DATABASE IF NOT EXISTS `tccdb`
 USE `tccdb`;
 
 -- ------------------------------------------------------------------------------
--- 1. TABELA: usuario (Autenticação / Acesso)
--- ------------------------------------------------------------------------------
-DROP TABLE IF EXISTS `usuario`;
-
--- ------------------------------------------------------------------------------
--- TABELA: usuarios (Autenticação / Pontuações e Estatísticas Gerais)
+-- 1. TABELA: usuario (Autenticação / Pontuações e Estatísticas Gerais)
 -- ------------------------------------------------------------------------------
 DROP TABLE IF EXISTS `usuarios`;
-CREATE TABLE IF NOT EXISTS `usuarios` (
+DROP TABLE IF EXISTS `usuario`;
+CREATE TABLE IF NOT EXISTS `usuario` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(255) NOT NULL,
   `senha` VARCHAR(255) NOT NULL,

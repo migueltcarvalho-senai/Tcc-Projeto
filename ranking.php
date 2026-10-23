@@ -15,7 +15,7 @@ $userId        = (int) ($_SESSION['id'] ?? 0);
 $nomeUsuario   = $_SESSION['user'] ?? '';
 $pontosUsuario = (int) ($_SESSION['pontuacao'] ?? 0);
 
-$tbl_usuarios = db_table($conn, 'usuarios');
+$tbl_usuarios = db_table($conn, 'usuario');
 
 // Seleção simples com a subtração de questões respondidas para determinar erros
 // Ordenado do usuário com mais acertos para o com menos acertos
@@ -63,6 +63,7 @@ if ($res) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Top Sabidos — Ranking dos Alunos</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 
     <!-- Google Fonts: Fredoka e Nunito -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

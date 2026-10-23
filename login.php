@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($loginInput) || empty($senha)) {
         $erro = 'Por favor, preencha todos os campos.';
     } else {
-        $tbl_usuarios = db_table($conn, "usuarios");
+        $tbl_usuarios = db_table($conn, "usuario");
         // Permite login por nome de usuário ou e-mail
         $sql = "SELECT id, nome, email, senha, pontuacao, questoesRespondidas, acertos FROM {$tbl_usuarios} WHERE nome = ? OR email = ? LIMIT 1";
         $stmt = $conn->prepare($sql);
@@ -79,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sketchbook Educacional</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
