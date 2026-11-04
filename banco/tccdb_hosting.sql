@@ -2,25 +2,6 @@
 -- PROJETO TCC: SKETCHBOOK EDUCACIONAL INTERATIVO (ENSINO FUNDAMENTAL 1)
 -- Script Completo para Implantação em Hospedagem Externa (Hosting / Nuvem / cPanel)
 -- ==============================================================================
---
--- GUIA DE INSTALAÇÃO EM HOSPEDAGEM EXTERNA:
--- 1. Se sua hospedagem permitir criação de banco via script (ex: VPS, Localhost, RDS):
---    - Mantenha as linhas CREATE DATABASE e USE abaixo ativas.
---
--- 2. Se for Hospedagem Compartilhada (cPanel / Hostinger / InfinityFree / Locaweb):
---    - O painel geralmente cria o banco com um prefixo (ex: u123456_tccdb).
---    - Nesse caso, selecione o banco já criado no phpMyAdmin e importe este arquivo.
---    - Comente as linhas "CREATE DATABASE" e "USE" se o phpMyAdmin acusar erro de privilégio (#1044).
---
--- 3. Após importar:
---    - Atualize as credenciais no arquivo 'config/config.php' da aplicação:
---      $host = "servidor_do_hosting"; (geralmente localhost na maioria dos cPanels)
---      $port = "3306"; (porta padrão de hosting; troque se o host usar outra)
---      $user = "seu_usuario_no_hosting";
---      $pass = "sua_senha_segura";
---      $db   = "seu_banco_no_hosting";
---
--- ==============================================================================
 
 -- Configurações de Sessão e Charset Universal (compatível com MySQL 5.7+, 8.0+ e MariaDB)
 SET NAMES utf8mb4;
@@ -40,6 +21,7 @@ USE `tccdb`;
 
 -- ------------------------------------------------------------------------------
 -- 1. TABELA: usuario (Autenticação / Pontuações e Estatísticas Gerais)
+-- Permite que alunos tenham o mesmo nome (apenas o e-mail é único)
 -- ------------------------------------------------------------------------------
 DROP TABLE IF EXISTS `usuarios`;
 DROP TABLE IF EXISTS `usuario`;
@@ -51,7 +33,8 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `pontuacao` INT NOT NULL DEFAULT 0,
   `questoesRespondidas` INT NOT NULL DEFAULT 0,
   `acertos` INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_usuario_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
@@ -150,11 +133,14 @@ INSERT INTO `Jogo` (`id`, `nome`, `descricao`) VALUES
 ON DUPLICATE KEY UPDATE `nome` = VALUES(`nome`), `descricao` = VALUES(`descricao`);
 
 -- ------------------------------------------------------------------------------
--- OBSERVAÇÃO:
--- As tabelas `Tema`, `Frases`, `Pergunta` e `palavras` foram criadas sem dados
--- iniciais automáticos (seeders removidos). Os temas e seus respectivos
--- conteúdos devem ser cadastrados manualmente.
+-- Dados da Tabela: Tema (4 Temas Oficiais: animals, sports, school, family)
 -- ------------------------------------------------------------------------------
+INSERT INTO `Tema` (`id`, `id_jogo`, `nome`) VALUES
+(7, NULL, 'animals'),
+(8, NULL, 'sports'),
+(9, NULL, 'school'),
+(10, NULL, 'family')
+ON DUPLICATE KEY UPDATE `nome` = VALUES(`nome`), `id_jogo` = NULL;
 
 -- Reativa a verificação de integridade referencial
 SET FOREIGN_KEY_CHECKS = 1;

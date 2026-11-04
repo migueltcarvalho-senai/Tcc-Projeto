@@ -170,9 +170,10 @@ body {
     box-sizing: border-box;
 }
 
-.balao-container:hover {
+.balao-container:hover,
+.balao-item:hover {
     filter: brightness(1.1) drop-shadow(0 8px 18px rgba(15, 23, 42, 0.35));
-    transform: scale(1.05);
+    transform: translate(-50%, -50%) scale(1.05) !important;
     z-index: 20;
 }
 

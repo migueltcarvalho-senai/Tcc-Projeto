@@ -31,21 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $tbl_usuarios = db_table($conn, "usuario");
         
-        // Verifica se já existe usuário com o mesmo nome ou email
-        $checkSql = "SELECT id, nome, email FROM {$tbl_usuarios} WHERE nome = ? OR email = ? LIMIT 1";
+        // Verifica apenas se o e-mail já está em uso (permitindo que usuários diferentes tenham o mesmo nome de aluno)
+        $checkSql = "SELECT id, email FROM {$tbl_usuarios} WHERE LOWER(email) = LOWER(?) LIMIT 1";
         $checkStmt = $conn->prepare($checkSql);
 
         if ($checkStmt) {
-            $checkStmt->bind_param("ss", $nome, $email);
+            $checkStmt->bind_param("s", $email);
             $checkStmt->execute();
             $checkRes = $checkStmt->get_result();
 
             if ($checkRow = $checkRes->fetch_assoc()) {
-                if (strcasecmp($checkRow['nome'], $nome) === 0) {
-                    $erro = 'Esse nome de usuário já está em uso. Por favor, escolha outro.';
-                } else {
-                    $erro = 'Esse e-mail já está cadastrado. Faça login ou use outro.';
-                }
+                $erro = 'Esse e-mail já está cadastrado. Faça login ou use outro.';
             } else {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $pontuacaoInicial = 0;
@@ -58,13 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($insertStmt) {
                     $insertStmt->bind_param("sssiii", $nome, $senhaHash, $email, $pontuacaoInicial, $questoesInicial, $acertosInicial);
                     
-                    if ($insertStmt->execute()) {
+                    if (@$insertStmt->execute()) {
                         $insertStmt->close();
                         $checkStmt->close();
                         header('Location: login.php?cadastrado=1');
                         exit;
                     } else {
-                        $erro = 'Erro ao salvar o cadastro. Tente novamente.';
+                        if ($insertStmt->errno === 1062 || $conn->errno === 1062) {
+                            $erro = 'Esse e-mail já está cadastrado. Faça login ou use outro.';
+                        } else {
+                            $erro = 'Erro ao salvar o cadastro. Tente novamente.';
+                        }
                     }
                     $insertStmt->close();
                 } else {

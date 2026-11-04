@@ -1,5 +1,6 @@
 -- ==============================================================================
 -- usuario_migration.sql — Estrutura e Migração da Tabela usuario
+-- Permite que múltiplos alunos tenham o mesmo nome (apenas email é único)
 -- Compatível com Linux (ext4, case-sensitive) e Windows (Laragon)
 -- ==============================================================================
 SET NAMES utf8mb4;
@@ -13,14 +14,9 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `email` VARCHAR(255) NOT NULL,
   `pontuacao` INT NOT NULL DEFAULT 0,
   `questoesRespondidas` INT NOT NULL DEFAULT 0,
-  `acertos` INT NOT NULL DEFAULT 0
+  `acertos` INT NOT NULL DEFAULT 0,
+  UNIQUE KEY `uk_usuario_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2. Se a tabela 'usuarios' existir no seu banco e você desejar migrá-la para 'usuario':
--- RENAME TABLE `usuarios` TO `usuario`;
-
--- 3. Caso sua tabela 'usuario' seja antiga (com pontuacaoPrimeiroJogo):
--- ALTER TABLE `usuario`
---   ADD COLUMN `pontuacao` INT NOT NULL DEFAULT 0,
---   ADD COLUMN `questoesRespondidas` INT NOT NULL DEFAULT 0,
---   ADD COLUMN `acertos` INT NOT NULL DEFAULT 0;
+-- 2. Caso a tabela já possua o índice UNIQUE em 'nome', remova-o:
+ALTER TABLE `usuario` DROP INDEX `uk_usuario_nome`;

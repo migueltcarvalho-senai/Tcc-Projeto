@@ -25,40 +25,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erro = 'Por favor, preencha todos os campos.';
     } else {
         $tbl_usuarios = db_table($conn, "usuario");
-        // Permite login por nome de usuário ou e-mail
-        $sql = "SELECT id, nome, email, senha, pontuacao, questoesRespondidas, acertos FROM {$tbl_usuarios} WHERE nome = ? OR email = ? LIMIT 1";
+        // Permite login por e-mail ou nome (mesmo que haja múltiplos alunos com o mesmo nome)
+        $sql = "SELECT id, nome, email, senha, pontuacao, questoesRespondidas, acertos FROM {$tbl_usuarios} WHERE email = ? OR nome = ?";
         $stmt = $conn->prepare($sql);
 
         if ($stmt) {
             $stmt->bind_param("ss", $loginInput, $loginInput);
             $stmt->execute();
             $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
 
-            $senhaValida = false;
-            if ($user) {
-                if (password_verify($senha, $user['senha'])) {
-                    $senhaValida = true;
-                } elseif ($senha === $user['senha']) {
-                    // Atualiza hash se estiver em texto puro antigo
-                    $senhaValida = true;
+            $usuarioAutenticado = null;
+            while ($row = $result->fetch_assoc()) {
+                if (password_verify($senha, $row['senha'])) {
+                    $usuarioAutenticado = $row;
+                    break;
+                } elseif ($senha === $row['senha']) {
+                    $usuarioAutenticado = $row;
                     $novoHash = password_hash($senha, PASSWORD_DEFAULT);
                     $updateStmt = $conn->prepare("UPDATE {$tbl_usuarios} SET senha = ? WHERE id = ?");
                     if ($updateStmt) {
-                        $updateStmt->bind_param("si", $novoHash, $user['id']);
+                        $updateStmt->bind_param("si", $novoHash, $row['id']);
                         $updateStmt->execute();
                         $updateStmt->close();
                     }
+                    break;
                 }
             }
 
-            if ($senhaValida) {
-                $_SESSION['id']                  = (int) $user['id'];
-                $_SESSION['user']                = $user['nome'];
-                $_SESSION['email']               = $user['email'];
-                $_SESSION['pontuacao']           = (int) ($user['pontuacao'] ?? 0);
-                $_SESSION['questoesRespondidas'] = (int) ($user['questoesRespondidas'] ?? 0);
-                $_SESSION['acertos']             = (int) ($user['acertos'] ?? 0);
+            if ($usuarioAutenticado) {
+                $_SESSION['id']                  = (int) $usuarioAutenticado['id'];
+                $_SESSION['user']                = $usuarioAutenticado['nome'];
+                $_SESSION['email']               = $usuarioAutenticado['email'];
+                $_SESSION['pontuacao']           = (int) ($usuarioAutenticado['pontuacao'] ?? 0);
+                $_SESSION['questoesRespondidas'] = (int) ($usuarioAutenticado['questoesRespondidas'] ?? 0);
+                $_SESSION['acertos']             = (int) ($usuarioAutenticado['acertos'] ?? 0);
 
                 header('Location: index.php');
                 exit;
