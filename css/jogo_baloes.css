@@ -633,8 +633,8 @@ body {
 }
 
 .balao-img {
-    width: 155px !important;
-    height: 185px !important;
+    width: 130px !important;
+    height: 156px !important;
     object-fit: contain !important;
     pointer-events: none !important;
     user-select: none !important;
@@ -648,7 +648,7 @@ body {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     font-family: 'Bingo', cursive, sans-serif !important;
-    font-size: 1.45rem !important;
+    font-size: 1.28rem !important;
     font-weight: 900 !important;
     color: #FFFFFF !important;
     text-shadow:
@@ -663,10 +663,10 @@ body {
     pointer-events: none !important;
     user-select: none !important;
     white-space: nowrap !important;
-    max-width: 140px !important;
+    max-width: 118px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    padding: 0 6px !important;
+    padding: 0 4px !important;
 }
 
 @keyframes balaoFlutuandoSuave {
@@ -699,14 +699,14 @@ body {
     }
 
     .balao-img {
-        width: 100px !important;
-        height: 124px !important;
+        width: 82px !important;
+        height: 102px !important;
     }
 
     .balao-palavra,
     .balao-texto {
-        font-size: 1.05rem !important;
-        max-width: 88px !important;
+        font-size: 0.9rem !important;
+        max-width: 74px !important;
         top: 36% !important;
     }
 
@@ -739,14 +739,14 @@ body {
     }
 
     .balao-img {
-        width: 82px !important;
-        height: 102px !important;
+        width: 68px !important;
+        height: 85px !important;
     }
 
     .balao-palavra,
     .balao-texto {
-        font-size: 0.88rem !important;
-        max-width: 74px !important;
+        font-size: 0.78rem !important;
+        max-width: 60px !important;
         top: 36% !important;
     }
 

@@ -594,37 +594,127 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
         }
 
         function calcularPosicoesBaloes(qtd) {
-            const layouts = {
-                1: [{ left: 50, top: 45 }],
-                2: [{ left: 30, top: 45 }, { left: 70, top: 45 }],
-                3: [{ left: 22, top: 45 }, { left: 50, top: 40 }, { left: 78, top: 45 }],
-                4: [
-                    { left: 26, top: 28 }, { left: 74, top: 28 },
-                    { left: 26, top: 70 }, { left: 74, top: 70 }
-                ],
-                5: [
-                    { left: 20, top: 28 }, { left: 50, top: 24 }, { left: 80, top: 28 },
-                    { left: 35, top: 70 }, { left: 65, top: 70 }
-                ],
-                6: [
-                    { left: 20, top: 28 }, { left: 50, top: 26 }, { left: 80, top: 28 },
-                    { left: 20, top: 70 }, { left: 50, top: 72 }, { left: 80, top: 70 }
-                ]
-            };
+            const area = areaBaloes || document.getElementById('area-baloes');
+            const areaWidth  = area && area.clientWidth  ? area.clientWidth  : 800;
+            const areaHeight = area && area.clientHeight ? area.clientHeight : 520;
 
-            if (layouts[qtd]) return layouts[qtd];
+            // 1 cm no padrão CSS = 96 / 2.54 ≈ 37.795 px
+            const cmToPx = 37.795;
 
-            const coords = [];
-            const cols = Math.min(4, Math.ceil(qtd / 2));
-            for (let i = 0; i < qtd; i++) {
-                const row = i < cols ? 0 : 1;
-                const colIdx = i % cols;
-                coords.push({
-                    left: Math.round(18 + (colIdx * (64 / Math.max(1, cols - 1)))),
-                    top:  row === 0 ? 28 : 70
-                });
+            // Fator de escala para telas menores (como mobile 9:16) para que o deslocamento de 1 a 5 cm seja seguro
+            const escalaMobileX = Math.min(1, Math.max(0.40, areaWidth / 850));
+            const escalaMobileY = Math.min(1, Math.max(0.40, areaHeight / 520));
+
+            // Grid base de 5 colunas e 2 linhas (em porcentagem)
+            const colunasBase = [12, 31, 50, 69, 88];
+            const linhasBase  = [27, 73];
+
+            // 1. Deslocamento horizontal de 1 a 5 cm para cada uma das 5 colunas
+            // Sentido: esquerda (-1) ou direita (+1), controlado para evitar sobreposições e respeitar bordas
+            const limitesFatias = [
+                { min: 7,  max: 20 },
+                { min: 23, max: 39 },
+                { min: 42, max: 58 },
+                { min: 61, max: 77 },
+                { min: 80, max: 93 }
+            ];
+
+            const colunasDeslocadas = colunasBase.map((baseCol, idx) => {
+                // Magnitude aleatória de 1 a 5 cm
+                const cm = 1 + Math.random() * 4; // entre 1.0 e 5.0 cm
+                const px = cm * cmToPx * escalaMobileX;
+                const pctDeslocamento = (px / areaWidth) * 100;
+
+                // Sentido de deslocamento para evitar bordas e sobreposições
+                let sentido;
+                if (idx === 0) {
+                    sentido = Math.random() < 0.75 ? 1 : -1;
+                } else if (idx === 4) {
+                    sentido = Math.random() < 0.75 ? -1 : 1;
+                } else {
+                    sentido = Math.random() < 0.5 ? -1 : 1;
+                }
+
+                let finalCol = baseCol + (sentido * pctDeslocamento);
+                finalCol = Math.max(limitesFatias[idx].min, Math.min(limitesFatias[idx].max, finalCol));
+                return parseFloat(finalCol.toFixed(2));
+            });
+
+            // 2. Deslocamento vertical de 1 a 5 cm para cada uma das 2 linhas
+            // Sentido: cima (-1) ou baixo (+1), mantendo folga segura entre linha 0 e linha 1
+            const linhasDeslocadas = linhasBase.map((baseLinha, idx) => {
+                const cm = 1 + Math.random() * 4; // entre 1.0 e 5.0 cm
+                const px = cm * cmToPx * escalaMobileY;
+                const pctDeslocamento = (px / areaHeight) * 100;
+
+                let sentido;
+                if (idx === 0) {
+                    // Linha 0 (superior) se move para cima ou levemente para baixo
+                    sentido = Math.random() < 0.7 ? -1 : 1;
+                } else {
+                    // Linha 1 (inferior) se move para baixo ou levemente para cima
+                    sentido = Math.random() < 0.7 ? 1 : -1;
+                }
+
+                let finalLinha = baseLinha + (sentido * pctDeslocamento);
+
+                // Garante que Linha 0 nunca ultrapasse 38% e Linha 1 nunca fique abaixo de 62%
+                // (Garantia física de no mínimo 24% de espaço vazio vertical entre as duas linhas)
+                if (idx === 0) {
+                    finalLinha = Math.max(14, Math.min(38, finalLinha));
+                } else {
+                    finalLinha = Math.max(62, Math.min(86, finalLinha));
+                }
+
+                return parseFloat(finalLinha.toFixed(2));
+            });
+
+            // 3. Distribuição dos balões para que fiquem em linhas e colunas diferentes
+            const coordenadas = [];
+
+            if (qtd <= 5) {
+                // Sorteia N colunas totalmente distintas entre as 5 disponíveis
+                const colsDisponiveis = [0, 1, 2, 3, 4];
+                for (let i = colsDisponiveis.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [colsDisponiveis[i], colsDisponiveis[j]] = [colsDisponiveis[j], colsDisponiveis[i]];
+                }
+
+                // Sorteia se começa na linha 0 ou 1 e alterna as linhas
+                const linhaInicial = Math.random() < 0.5 ? 0 : 1;
+
+                for (let i = 0; i < qtd; i++) {
+                    const colIdx = colsDisponiveis[i];
+                    const rowIdx = (linhaInicial + i) % 2; // Linhas alternadas (0, 1, 0, 1...)
+                    coordenadas.push({
+                        left: colunasDeslocadas[colIdx],
+                        top:  linhasDeslocadas[rowIdx]
+                    });
+                }
+            } else {
+                // Caso a frase possua mais de 5 palavras, preenche as 10 células (2x5) sem repetição
+                const slotsDisponiveis = [];
+                for (let r = 0; r < 2; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        slotsDisponiveis.push({ r, c });
+                    }
+                }
+
+                for (let i = slotsDisponiveis.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [slotsDisponiveis[i], slotsDisponiveis[j]] = [slotsDisponiveis[j], slotsDisponiveis[i]];
+                }
+
+                for (let i = 0; i < qtd && i < slotsDisponiveis.length; i++) {
+                    const { r, c } = slotsDisponiveis[i];
+                    coordenadas.push({
+                        left: colunasDeslocadas[c],
+                        top:  linhasDeslocadas[r]
+                    });
+                }
             }
-            return coords;
+
+            return coordenadas;
         }
 
         function estourarBalao(balaoEl, imgEl, palavra) {
