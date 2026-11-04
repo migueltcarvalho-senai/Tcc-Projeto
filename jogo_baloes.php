@@ -595,128 +595,98 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
 
         function calcularPosicoesBaloes(qtd) {
             const area = areaBaloes || document.getElementById('area-baloes');
-            const areaWidth  = area && area.clientWidth  ? area.clientWidth  : 800;
-            const areaHeight = area && area.clientHeight ? area.clientHeight : 520;
+            const areaWidth  = area && area.clientWidth  ? area.clientWidth  : 850;
+            const areaHeight = area && area.clientHeight ? area.clientHeight : 540;
 
             // 1 cm no padrão CSS = 96 / 2.54 ≈ 37.795 px
             const cmToPx = 37.795;
 
-            // Fator de escala para telas menores (como mobile 9:16) para que o deslocamento de 1 a 5 cm seja seguro
-            const escalaMobileX = Math.min(1, Math.max(0.40, areaWidth / 850));
-            const escalaMobileY = Math.min(1, Math.max(0.40, areaHeight / 520));
+            // Escala dinâmica suave para manter margens amplas em qualquer tamanho de tela
+            const escalaX = Math.min(1, Math.max(0.35, areaWidth / 850));
+            const escalaY = Math.min(1, Math.max(0.35, areaHeight / 540));
 
-            // Grid base de 5 colunas e 2 linhas (em porcentagem)
-            const colunasBase = [12, 31, 50, 69, 88];
-            const linhasBase  = [27, 73];
+            // Grid base de 5 colunas com 20% de separação central (10%, 30%, 50%, 70%, 90%)
+            const colunasBase = [10, 30, 50, 70, 90];
+            // 2 linhas com 58% de vão vertical (Linha 0 a 20%, Linha 1 a 78%)
+            const linhasBase  = [20, 78];
 
-            // 1. Deslocamento horizontal de 1 a 5 cm para cada uma das 5 colunas
-            // Sentido: esquerda (-1) ou direita (+1), controlado para evitar sobreposições e respeitar bordas
+            // Fatias seguras com MARGEM MÍNIMA INVIOLÁVEL de 10% entre colunas vizinhas
+            // Col 0: [7, 15]   -> vão até Col 1: 10% (85px livre)
+            // Col 1: [25, 35]  -> vão até Col 2: 10% (85px livre)
+            // Col 2: [45, 55]  -> vão até Col 3: 10% (85px livre)
+            // Col 3: [65, 75]  -> vão até Col 4: 10% (85px livre)
+            // Col 4: [85, 93]
             const limitesFatias = [
-                { min: 7,  max: 20 },
-                { min: 23, max: 39 },
-                { min: 42, max: 58 },
-                { min: 61, max: 77 },
-                { min: 80, max: 93 }
+                { min: 7,  max: 15 },
+                { min: 25, max: 35 },
+                { min: 45, max: 55 },
+                { min: 65, max: 75 },
+                { min: 85, max: 93 }
             ];
 
+            // 1. Deslocamento horizontal de 1 a 5 cm por coluna
             const colunasDeslocadas = colunasBase.map((baseCol, idx) => {
-                // Magnitude aleatória de 1 a 5 cm
-                const cm = 1 + Math.random() * 4; // entre 1.0 e 5.0 cm
-                const px = cm * cmToPx * escalaMobileX;
+                const cm = 1 + Math.random() * 4; // 1 a 5 cm
+                const px = cm * cmToPx * escalaX * 0.35;
                 const pctDeslocamento = (px / areaWidth) * 100;
 
-                // Sentido de deslocamento para evitar bordas e sobreposições
-                let sentido;
-                if (idx === 0) {
-                    sentido = Math.random() < 0.75 ? 1 : -1;
-                } else if (idx === 4) {
-                    sentido = Math.random() < 0.75 ? -1 : 1;
-                } else {
-                    sentido = Math.random() < 0.5 ? -1 : 1;
-                }
-
+                const sentido = (idx === 0) ? 1 : (idx === 4 ? -1 : (Math.random() < 0.5 ? -1 : 1));
                 let finalCol = baseCol + (sentido * pctDeslocamento);
                 finalCol = Math.max(limitesFatias[idx].min, Math.min(limitesFatias[idx].max, finalCol));
                 return parseFloat(finalCol.toFixed(2));
             });
 
-            // 2. Deslocamento vertical de 1 a 5 cm para cada uma das 2 linhas
-            // Sentido: cima (-1) ou baixo (+1), mantendo folga segura entre linha 0 e linha 1
+            // 2. Deslocamento vertical de 1 a 5 cm por linha
+            // Linha 0 fica em [15, 26]; Linha 1 fica em [72, 83] -> MÍNIMO 46% (~250px) DE VÃO VERTICAL LIVRE!
             const linhasDeslocadas = linhasBase.map((baseLinha, idx) => {
-                const cm = 1 + Math.random() * 4; // entre 1.0 e 5.0 cm
-                const px = cm * cmToPx * escalaMobileY;
+                const cm = 1 + Math.random() * 4; // 1 a 5 cm
+                const px = cm * cmToPx * escalaY * 0.35;
                 const pctDeslocamento = (px / areaHeight) * 100;
 
-                let sentido;
-                if (idx === 0) {
-                    // Linha 0 (superior) se move para cima ou levemente para baixo
-                    sentido = Math.random() < 0.7 ? -1 : 1;
-                } else {
-                    // Linha 1 (inferior) se move para baixo ou levemente para cima
-                    sentido = Math.random() < 0.7 ? 1 : -1;
-                }
-
+                const sentido = (idx === 0) ? -1 : 1;
                 let finalLinha = baseLinha + (sentido * pctDeslocamento);
-
-                // Garante que Linha 0 nunca ultrapasse 38% e Linha 1 nunca fique abaixo de 62%
-                // (Garantia física de no mínimo 24% de espaço vazio vertical entre as duas linhas)
                 if (idx === 0) {
-                    finalLinha = Math.max(14, Math.min(38, finalLinha));
+                    finalLinha = Math.max(15, Math.min(26, finalLinha));
                 } else {
-                    finalLinha = Math.max(62, Math.min(86, finalLinha));
+                    finalLinha = Math.max(72, Math.min(83, finalLinha));
                 }
-
                 return parseFloat(finalLinha.toFixed(2));
             });
 
-            // 3. Distribuição dos balões para que fiquem em linhas e colunas diferentes
+            // 3. Distribuição em Zig-Zag / Xadrez (Anti-Pares):
+            // Garante que NUNCA haja dois balões em colunas adjacentes na mesma linha!
+            //   Palavra 0: Coluna 0, Linha 0 (Topo Esquerda)
+            //   Palavra 1: Coluna 1, Linha 1 (Baixo Meio-Esquerda)
+            //   Palavra 2: Coluna 2, Linha 0 (Topo Centro)
+            //   Palavra 3: Coluna 3, Linha 1 (Baixo Meio-Direita)
+            //   Palavra 4: Coluna 4, Linha 0 (Topo Direita)
+            // Na mesma linha, os balões ficam a no mínimo 40% (340px) de distância. Zero pares colados!
+            const invertido = Math.random() < 0.5;
+            const slotsZigZag = [];
+
+            // Primeira passada (até 5 palavras): zig-zag estrito
+            for (let c = 0; c < 5; c++) {
+                const r = invertido ? (c % 2 === 0 ? 1 : 0) : (c % 2 === 0 ? 0 : 1);
+                slotsZigZag.push({ c, r });
+            }
+
+            // Segunda passada (se houver de 6 a 10 palavras): aloca nas posições complementares
+            for (let c = 0; c < 5; c++) {
+                const r = invertido ? (c % 2 === 0 ? 0 : 1) : (c % 2 === 0 ? 1 : 0);
+                slotsZigZag.push({ c, r });
+            }
+
             const coordenadas = [];
-
-            if (qtd <= 5) {
-                // Sorteia N colunas totalmente distintas entre as 5 disponíveis
-                const colsDisponiveis = [0, 1, 2, 3, 4];
-                for (let i = colsDisponiveis.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [colsDisponiveis[i], colsDisponiveis[j]] = [colsDisponiveis[j], colsDisponiveis[i]];
-                }
-
-                // Sorteia se começa na linha 0 ou 1 e alterna as linhas
-                const linhaInicial = Math.random() < 0.5 ? 0 : 1;
-
-                for (let i = 0; i < qtd; i++) {
-                    const colIdx = colsDisponiveis[i];
-                    const rowIdx = (linhaInicial + i) % 2; // Linhas alternadas (0, 1, 0, 1...)
-                    coordenadas.push({
-                        left: colunasDeslocadas[colIdx],
-                        top:  linhasDeslocadas[rowIdx]
-                    });
-                }
-            } else {
-                // Caso a frase possua mais de 5 palavras, preenche as 10 células (2x5) sem repetição
-                const slotsDisponiveis = [];
-                for (let r = 0; r < 2; r++) {
-                    for (let c = 0; c < 5; c++) {
-                        slotsDisponiveis.push({ r, c });
-                    }
-                }
-
-                for (let i = slotsDisponiveis.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [slotsDisponiveis[i], slotsDisponiveis[j]] = [slotsDisponiveis[j], slotsDisponiveis[i]];
-                }
-
-                for (let i = 0; i < qtd && i < slotsDisponiveis.length; i++) {
-                    const { r, c } = slotsDisponiveis[i];
-                    coordenadas.push({
-                        left: colunasDeslocadas[c],
-                        top:  linhasDeslocadas[r]
-                    });
-                }
+            for (let i = 0; i < qtd && i < slotsZigZag.length; i++) {
+                const { r, c } = slotsZigZag[i];
+                coordenadas.push({
+                    left: colunasDeslocadas[c],
+                    top:  linhasDeslocadas[r]
+                });
             }
 
             return coordenadas;
         }
-
         function estourarBalao(balaoEl, imgEl, palavra) {
             balaoEl.classList.add('balao-estourado');
             balaoEl.style.animation = 'none';

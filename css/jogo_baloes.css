@@ -157,17 +157,22 @@ body {
 }
 
 /* Container de cada balão */
-.balao-container {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: filter 0.18s ease, transform 0.15s ease;
+.balao-container,
+.balao-item {
+    position: absolute !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
     z-index: 5;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    box-sizing: border-box;
+    transition: filter 0.18s ease, transform 0.15s ease;
 }
 
 .balao-container:hover,
