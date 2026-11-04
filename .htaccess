@@ -1,0 +1,11 @@
+# ==============================================================================
+# .htaccess — Configurações para Apache / Hosting Linux
+# ==============================================================================
+
+# Prioriza o index.php em relação ao index.html
+DirectoryIndex index.php index.html
+
+# Previne que requisições de favicon.ico faltante acionem o index.php ou criem loops
+<Files "favicon.ico">
+    ErrorDocument 404 "data:image/x-icon;base64,="
+</Files>

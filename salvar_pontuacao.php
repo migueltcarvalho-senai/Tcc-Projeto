@@ -48,7 +48,7 @@ if ($userId <= 0) {
     exit;
 }
 
-$tbl_usuarios = db_table($conn, 'usuarios');
+$tbl_usuarios = db_table($conn, 'usuario');
 
 // Atualiza o banco somando as novas estatísticas
 $sql_update = "
