@@ -68,11 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     $insertStmt->close();
                 } else {
+                    error_log("registro.php [insertStmt prepare error]: " . $conn->error);
                     $erro = 'Erro interno ao preparar o registro.';
                 }
             }
             $checkStmt->close();
         } else {
+            error_log("registro.php [checkStmt prepare error]: " . $conn->error);
             $erro = 'Erro interno ao consultar o banco de dados.';
         }
     }

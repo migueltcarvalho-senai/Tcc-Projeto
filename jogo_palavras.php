@@ -576,6 +576,31 @@ $palavras_json = json_encode(
             }
         }
 
+        function tocarSom(tipo) {
+            try {
+                let arquivo = '';
+                if (tipo === 'correct') {
+                    arquivo = 'sounds/Correct.mp3';
+                } else if (tipo === 'failure') {
+                    arquivo = 'sounds/Failure.mp3';
+                } else if (tipo === 'win') {
+                    arquivo = 'sounds/Win.mp3';
+                }
+                if (!arquivo) return;
+
+                const audio = new Audio(arquivo);
+                audio.currentTime = 0;
+                const p = audio.play();
+                if (p !== undefined) {
+                    p.catch(err => {
+                        console.warn('Reprodução de som (' + tipo + ') prevenida:', err);
+                    });
+                }
+            } catch (e) {
+                console.warn('Erro ao tocar som:', e);
+            }
+        }
+
         function verificarPalavra() {
             estaValidando = true;
 
@@ -588,8 +613,18 @@ $palavras_json = json_encode(
                 .join('');
 
             const palavraCorreta = palavraObj.palavra;
+            const acertou = (palavraMontada === palavraCorreta);
+            const isUltima = (indicePalavraAtual >= totalPalavras - 1);
 
-            if (palavraMontada === palavraCorreta) {
+            if (isUltima) {
+                tocarSom('win');
+            } else if (acertou) {
+                tocarSom('correct');
+            } else {
+                tocarSom('failure');
+            }
+
+            if (acertou) {
                 // ACERTO
                 acertos++;
 
@@ -618,13 +653,24 @@ $palavras_json = json_encode(
                     if (slot) slot.className = 'letra-slot letra-slot-erro';
                 }
 
-                if (areaFeedback) {
-                    areaFeedback.innerHTML = '<span class="feedback-erro">OOPS! TRY AGAIN!</span>';
-                }
+                if (isUltima) {
+                    if (areaFeedback) {
+                        areaFeedback.innerHTML = '<span class="feedback-erro">GOOD TRY! FINISHED!</span>';
+                    }
+                    atualizarProgresso();
+                    setTimeout(() => {
+                        indicePalavraAtual++;
+                        carregarPalavra(indicePalavraAtual);
+                    }, 1400);
+                } else {
+                    if (areaFeedback) {
+                        areaFeedback.innerHTML = '<span class="feedback-erro">OOPS! TRY AGAIN!</span>';
+                    }
 
-                setTimeout(() => {
-                    reiniciarPalavraAtual();
-                }, 1600);
+                    setTimeout(() => {
+                        reiniciarPalavraAtual();
+                    }, 1600);
+                }
             }
         }
 

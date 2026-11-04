@@ -536,11 +536,45 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
         });
     }
 
+    function tocarSom(tipo) {
+        try {
+            let arquivo = '';
+            if (tipo === 'correct') {
+                arquivo = 'sounds/Correct.mp3';
+            } else if (tipo === 'failure') {
+                arquivo = 'sounds/Failure.mp3';
+            } else if (tipo === 'win') {
+                arquivo = 'sounds/Win.mp3';
+            }
+            if (!arquivo) return;
+
+            const audio = new Audio(arquivo);
+            audio.currentTime = 0;
+            const p = audio.play();
+            if (p !== undefined) {
+                p.catch(err => {
+                    console.warn('Reprodução de som (' + tipo + ') prevenida:', err);
+                });
+            }
+        } catch (e) {
+            console.warn('Erro ao tocar som:', e);
+        }
+    }
+
     function verificarResposta(cardClicado, escolha, correta) {
         if (respondeuAtual) return;
         respondeuAtual = true;
 
+        const ehUltimaPergunta = (indicePerguntaAtual >= TOTAL - 1);
         const acertou = String(escolha).toLowerCase().trim() === String(correta).toLowerCase().trim();
+
+        if (ehUltimaPergunta) {
+            tocarSom('win');
+        } else if (acertou) {
+            tocarSom('correct');
+        } else {
+            tocarSom('failure');
+        }
 
         if (acertou) {
             cardClicado.classList.add('opcao-correta');
@@ -573,26 +607,35 @@ $perguntas_json = json_encode($perguntas, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG 
                 elConteinerLacuna.classList.add('lacuna-errou');
             }
 
-            if (elFeedback) {
-                elFeedback.textContent = 'Try again! You can do it!';
-                elFeedback.style.color = '#b91c1c';
-            }
-
-            setTimeout(() => {
-                respondeuAtual = false;
-                cardClicado.classList.remove('opcao-errada');
-                if (elLacuna) {
-                    elLacuna.textContent = '_____';
-                    elLacuna.className   = 'lacuna';
-                }
-                if (elConteinerLacuna) {
-                    elConteinerLacuna.classList.remove('lacuna-errou');
-                }
+            if (ehUltimaPergunta) {
                 if (elFeedback) {
-                    elFeedback.textContent = '';
-                    elFeedback.style.color = '';
+                    elFeedback.textContent = 'Good try! You finished the quiz!';
+                    elFeedback.style.color = '#b91c1c';
                 }
-            }, 900);
+                desabilitarOutrasOpcoes(cardClicado);
+                setTimeout(avancarPergunta, 1400);
+            } else {
+                if (elFeedback) {
+                    elFeedback.textContent = 'Try again! You can do it!';
+                    elFeedback.style.color = '#b91c1c';
+                }
+
+                setTimeout(() => {
+                    respondeuAtual = false;
+                    cardClicado.classList.remove('opcao-errada');
+                    if (elLacuna) {
+                        elLacuna.textContent = '_____';
+                        elLacuna.className   = 'lacuna';
+                    }
+                    if (elConteinerLacuna) {
+                        elConteinerLacuna.classList.remove('lacuna-errou');
+                    }
+                    if (elFeedback) {
+                        elFeedback.textContent = '';
+                        elFeedback.style.color = '';
+                    }
+                }, 900);
+            }
         }
     }
 
