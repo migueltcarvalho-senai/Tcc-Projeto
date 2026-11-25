@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 session_start();
 require_once __DIR__ . '/config/config.php';
 
 // Se já estiver logado, redireciona para a página principal
 if (isset($_SESSION['id'])) {
-    header('Location: hub.php');
+    header('Location: index.php');
     exit;
 }
 
