@@ -570,10 +570,46 @@ $palavras_json = json_encode(
             });
         }
 
+        function tocarSom(tipo) {
+            try {
+                let arquivo = '';
+                if (tipo === 'correct') {
+                    arquivo = 'sounds/Correct.mp3';
+                } else if (tipo === 'failure') {
+                    arquivo = 'sounds/Failure.mp3';
+                } else if (tipo === 'win') {
+                    arquivo = 'sounds/Win.mp3';
+                }
+                if (!arquivo) return;
+
+                const audio = new Audio(arquivo);
+                audio.currentTime = 0;
+                const p = audio.play();
+                if (p !== undefined) {
+                    p.catch(err => {
+                        console.warn('Reprodução de som (' + tipo + ') prevenida:', err);
+                    });
+                }
+            } catch (e) {
+                console.warn('Erro ao tocar som:', e);
+            }
+        }
+
         function verificarResposta(cardClicado, palavraEscolhida) {
             estaValidando = true;
 
-            if (palavraEscolhida.toLowerCase() === palavraCorrente) {
+            const isUltima = (indiceAtual >= totalPalavras - 1);
+            const acertou  = (palavraEscolhida.toLowerCase() === palavraCorrente);
+
+            if (isUltima) {
+                tocarSom('win');
+            } else if (acertou) {
+                tocarSom('correct');
+            } else {
+                tocarSom('failure');
+            }
+
+            if (acertou) {
                 // ACERTO
                 acertos++;
                 cardClicado.classList.add('opcao-correta');
@@ -599,18 +635,33 @@ $palavras_json = json_encode(
                 // ERRO
                 cardClicado.classList.add('opcao-errada');
 
-                if (areaFeedback) {
-                    areaFeedback.innerHTML = '<span class="feedback-erro">TRY AGAIN! LISTEN CLOSELY!</span>';
+                if (isUltima) {
+                    if (areaFeedback) {
+                        areaFeedback.innerHTML = '<span class="feedback-erro">GOOD TRY! FINISHED!</span>';
+                    }
+                    const todos = gradeOpcoes.querySelectorAll('.cartao-opcao');
+                    todos.forEach(c => {
+                        if (c !== cardClicado) c.classList.add('opcao-desabilitada');
+                    });
+                    atualizarProgresso();
+                    setTimeout(() => {
+                        indiceAtual++;
+                        carregarRodada(indiceAtual);
+                    }, 1400);
+                } else {
+                    if (areaFeedback) {
+                        areaFeedback.innerHTML = '<span class="feedback-erro">TRY AGAIN! LISTEN CLOSELY!</span>';
+                    }
+
+                    // Repete o áudio para ajudar a criança
+                    pronunciarPalavra(palavraCorrente);
+
+                    setTimeout(() => {
+                        estaValidando = false;
+                        cardClicado.classList.remove('opcao-errada');
+                        if (areaFeedback) areaFeedback.innerHTML = '';
+                    }, 1400);
                 }
-
-                // Repete o áudio para ajudar a criança
-                pronunciarPalavra(palavraCorrente);
-
-                setTimeout(() => {
-                    estaValidando = false;
-                    cardClicado.classList.remove('opcao-errada');
-                    if (areaFeedback) areaFeedback.innerHTML = '';
-                }, 1400);
             }
         }
 

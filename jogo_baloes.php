@@ -719,6 +719,31 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
             }
         }
 
+        function tocarSom(tipo) {
+            try {
+                let arquivo = '';
+                if (tipo === 'correct') {
+                    arquivo = 'sounds/Correct.mp3';
+                } else if (tipo === 'failure') {
+                    arquivo = 'sounds/Failure.mp3';
+                } else if (tipo === 'win') {
+                    arquivo = 'sounds/Win.mp3';
+                }
+                if (!arquivo) return;
+
+                const audio = new Audio(arquivo);
+                audio.currentTime = 0;
+                const p = audio.play();
+                if (p !== undefined) {
+                    p.catch(err => {
+                        console.warn('Reprodução de som (' + tipo + ') prevenida:', err);
+                    });
+                }
+            } catch (e) {
+                console.warn('Erro ao tocar som:', e);
+            }
+        }
+
         function verificarConclusaoRodada() {
             const fraseObj = frasesData[indiceFraseAtual];
             if (!fraseObj || !Array.isArray(fraseObj.palavras)) return;
@@ -732,8 +757,18 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
 
             const fraseMontada = palavrasSelecionadas.join(' ').trim().toLowerCase();
             const fraseEsperada = String(fraseObj.frase_controle || '').trim().toLowerCase();
+            const acertou = (fraseMontada === fraseEsperada);
+            const isUltima = (indiceFraseAtual >= totalFrases - 1);
 
-            if (fraseMontada === fraseEsperada) {
+            if (isUltima) {
+                tocarSom('win');
+            } else if (acertou) {
+                tocarSom('correct');
+            } else {
+                tocarSom('failure');
+            }
+
+            if (acertou) {
                 acertos++;
                 if (boxFraseCorreta) boxFraseCorreta.innerHTML = '';
                 if (areaFeedback) {
@@ -781,17 +816,32 @@ $baloes_cores_json = json_encode($baloes_cores, JSON_UNESCAPED_SLASHES) ?: '[]';
                     `;
                 }
 
-                if (areaFeedback) {
-                    areaFeedback.innerHTML = `
-                        <span class="feedback-erro flex items-center justify-center gap-2">
-                            <span>OOPS! TRY AGAIN!</span>
-                        </span>
-                    `;
-                }
+                if (isUltima) {
+                    if (areaFeedback) {
+                        areaFeedback.innerHTML = `
+                            <span class="feedback-erro flex items-center justify-center gap-2">
+                                <span>GOOD TRY! FINISHED!</span>
+                            </span>
+                        `;
+                    }
+                    atualizarProgresso();
+                    setTimeout(() => {
+                        indiceFraseAtual++;
+                        carregarFrase(indiceFraseAtual);
+                    }, 2200);
+                } else {
+                    if (areaFeedback) {
+                        areaFeedback.innerHTML = `
+                            <span class="feedback-erro flex items-center justify-center gap-2">
+                                <span>OOPS! TRY AGAIN!</span>
+                            </span>
+                        `;
+                    }
 
-                setTimeout(() => {
-                    reiniciarFraseAtual();
-                }, 2800);
+                    setTimeout(() => {
+                        reiniciarFraseAtual();
+                    }, 2800);
+                }
             }
         }
 
