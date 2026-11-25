@@ -1,10 +1,10 @@
-<?php
+﻿<?php
 session_start();
 require_once __DIR__ . '/config/config.php';
 
 // Se já estiver logado, redireciona para a página principal
 if (isset($_SESSION['id'])) {
-    header('Location: index.php');
+    header('Location: hub.php');
     exit;
 }
 
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['questoesRespondidas'] = (int) ($usuarioAutenticado['questoesRespondidas'] ?? 0);
                 $_SESSION['acertos']             = (int) ($usuarioAutenticado['acertos'] ?? 0);
 
-                header('Location: index.php');
+                header('Location: hub.php');
                 exit;
             } else {
                 $erro = 'Nome de usuário/e-mail ou senha incorretos.';

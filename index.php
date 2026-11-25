@@ -110,7 +110,13 @@ if ($userId > 0) {
 
         <!-- BARRA SUPERIOR DO LIVRO (ALUNO, PLACAR & LOGOUT) -->
         <header id="cabecalho-principal" class="w-full flex flex-wrap items-center justify-between gap-3 pb-3 mb-4">
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <a href="hub.php" title="Voltar ao Hub de Disciplinas" class="cartao-dinamico flex items-center gap-2 bg-papel-claro borda-tinta-escura rounded-xl px-3.5 py-1.5 shadow-sombra-cartum-branca font-bingo font-bold text-xs sm:text-sm text-tinta-escura hover:bg-yellow-100 transition-colors no-underline">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <path d="M19 12H5M12 5l-7 7 7 7"/>
+                    </svg>
+                    <span>HUB</span>
+                </a>
                 <span class="bg-papel-claro borda-tinta-escura rounded-xl px-3.5 py-1.5 font-bingo font-bold text-xs sm:text-sm text-tinta-escura shadow-sombra-cartum-branca">
                     ALUNO: <?= htmlspecialchars($nomeUsuario) ?>
                 </span>
